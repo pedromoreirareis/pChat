@@ -27,9 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pedromoreirareisgmail.pchat.Adapters.AdapterMensagem;
@@ -48,9 +46,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -66,7 +62,7 @@ public class ChatActivity extends AppCompatActivity implements
     private DatabaseReference mRefChat;
     private DatabaseReference mRefMensagensAmigo;
     private DatabaseReference mRefChatUsuario;
-    private StorageReference mStorageImagens;
+    // private StorageReference mStorageImagens;
     private TextView mTvBarNome;
     private TextView mTvBarVisualizacao;
     private CircleImageView mCivImagem;
@@ -118,7 +114,7 @@ public class ChatActivity extends AppCompatActivity implements
         mRefRoot = Fire.getRefRoot();
         mRefRoot.keepSynced(true);
 
-        mRefAmigo =  mRefRoot.child(Const.PASTA_USUARIOS).child(mIdAmigo);
+        mRefAmigo = mRefRoot.child(Const.PASTA_USUARIOS).child(mIdAmigo);
         mRefAmigo.keepSynced(true);
 
         mRefChat = mRefRoot.child(Const.PASTA_CHAT);
@@ -129,12 +125,9 @@ public class ChatActivity extends AppCompatActivity implements
 
         mRefMensagensAmigo = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo);
         mRefMensagensAmigo.keepSynced(true);
-
-        mStorageImagens = FirebaseStorage.getInstance().getReference();
     }
 
     private void initViews() {
-
 
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarChat;
@@ -331,7 +324,7 @@ public class ChatActivity extends AppCompatActivity implements
                     if (dataSnapshot.hasChild(Const.DB_ULT_VEZ)) {
 
                         long ultimaVez = (long) dataSnapshot.child(Const.DB_ULT_VEZ).getValue();
-                        mTvBarVisualizacao.setText(GetDateTime.getTimeAgo(ultimaVez, ChatActivity.this));
+                        mTvBarVisualizacao.setText(GetDateTime.getTimeAgo(ultimaVez, mContext));
                     }
                 }
 
@@ -376,6 +369,9 @@ public class ChatActivity extends AppCompatActivity implements
 
                 if (!dataSnapshot.hasChild(mIdAmigo)) {
 
+
+
+                    /*
                     Map<String, Object> mapAddChat = new HashMap<>();
                     mapAddChat.put(Const.CHAT_LIDA, false);
                     mapAddChat.put(Const.CHAT_TIME, ServerValue.TIMESTAMP);
@@ -385,7 +381,8 @@ public class ChatActivity extends AppCompatActivity implements
                     mapUsuarioChat.put(Const.PASTA_CHAT + "/" + mIdUsuario + "/" + mIdAmigo, mapAddChat);
                     mapUsuarioChat.put(Const.PASTA_CHAT + "/" + mIdAmigo + "/" + mIdUsuario, mapAddChat);
 
-                    mRefRoot.updateChildren(mapUsuarioChat, new DatabaseReference.CompletionListener() {
+*/
+                    mRefRoot.updateChildren(FireUtils.mapAddUsuariosChat(mIdUsuario,mIdAmigo), new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -462,14 +459,10 @@ public class ChatActivity extends AppCompatActivity implements
         final byte[] imagem = Comprimir.comprimirImagemNoLA(mContext, filePath, 40);
         final byte[] imagemThumb = Comprimir.comprimirImagemNoLA(mContext, filePath, 1);
 
-       // final String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
-       // final String rootAmigo = Const.PASTA_MENSAGENS + "/" + mIdAmigo + "/" + mIdUsuario + "/";
+        String pushId = FireUtils.pushIdMsg(mIdUsuario, mIdAmigo);
 
-        //DatabaseReference pushMsg = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo).push();
-        String pushId = FireUtils.pushIdMsg(mIdUsuario,mIdAmigo);
-
-        StorageReference storageImagem = mStorageImagens.child(Const.S_PASTA_IMAGENS_MSG).child(pushId + ".jpg");
-        final StorageReference storageImagemThumb = mStorageImagens.child(Const.S_PASTA_IMAGENS_MSG_THUMB).child(pushId + ".jpg");
+        StorageReference storageImagem = Fire.getStorageRefImgMsg().child(pushId + ".jpg");
+        final StorageReference storageImagemThumb = Fire.getStorageRefImgMsgThumbnail().child(pushId + ".jpg");
 
         storageImagem.putBytes(imagem).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -489,33 +482,16 @@ public class ChatActivity extends AppCompatActivity implements
 
                                 String urlThumb = taskThumb.getResult().getDownloadUrl().toString();
 
-
-
-                                /*
-                                Map<String, Object> mapMensagem = new HashMap<>();
-                                mapMensagem.put(Const.CHAT_MSG_MENSAGEM, urlDownloadImage);
-                                mapMensagem.put(Const.CHAT_MSG_THUMB, urlDownloadThumb);
-                                mapMensagem.put(Const.CHAT_MSG_LIDA, false);
-                                mapMensagem.put(Const.CHAT_MSG_TIPO, Const.CHAT_MSG_TIPO_IMAGE);
-                                mapMensagem.put(Const.CHAT_MSG_TIME, ServerValue.TIMESTAMP);
-                                mapMensagem.put(Const.CHAT_MSG_ORIGEM, mIdUsuario);
-
-                                Map<String, Object> mapEnviarMensagem = new HashMap<>();
-                                mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMensagem);
-                                mapEnviarMensagem.put(rootAmigo + "/" + pushId, mapMensagem);
-
-                                */
-
-                                mRefRoot.updateChildren(FireUtils.mapEnviarMsgImagem(mIdUsuario,mIdAmigo,urlImage,urlThumb),
+                                mRefRoot.updateChildren(FireUtils.mapEnviarMsgImagem(mIdUsuario, mIdAmigo, urlImage, urlThumb),
                                         new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            @Override
+                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                        if (databaseError != null) {
+                                                if (databaseError != null) {
 
-                                        }
-                                    }
-                                });
+                                                }
+                                            }
+                                        });
                             }
                         }
                     });
@@ -531,43 +507,19 @@ public class ChatActivity extends AppCompatActivity implements
 
         if (!TextUtils.isEmpty(mensagem)) {
 
-          /*  String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
-            String rootAmigo = Const.PASTA_MENSAGENS + "/" + mIdAmigo + "/" + mIdUsuario + "/";
-
-            DatabaseReference pushMsg = mRefRoot.child(Const.PASTA_MENSAGENS)
-                    .child(mIdUsuario).child(mIdAmigo).push();
-
-            String pushId = pushMsg.getKey();
-
-
-            Map<String, Object> mapMensagem = new HashMap<>();
-            mapMensagem.put(Const.CHAT_MSG_MENSAGEM, mensagem);
-            mapMensagem.put(Const.CHAT_MSG_THUMB, Const.CHAT_MSG_THUMB_PADRAO);
-            mapMensagem.put(Const.CHAT_MSG_LIDA, false);
-            mapMensagem.put(Const.CHAT_MSG_TIPO, Const.CHAT_MSG_TIPO_TEXT);
-            mapMensagem.put(Const.CHAT_MSG_TIME, ServerValue.TIMESTAMP);
-            mapMensagem.put(Const.CHAT_MSG_ORIGEM, mIdUsuario);
-
-
-            Map<String, Object> mapEnviarMensagem = new HashMap<>();
-            mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMensagem);
-            mapEnviarMensagem.put(rootAmigo + "/" + pushId, mapMensagem);
-            */
-
             mEtMensagem.setText("");
 
-            mRefRoot.updateChildren(FireUtils.mapEnviarMsgTexto(mIdUsuario,mIdAmigo,mensagem),
+            mRefRoot.updateChildren(FireUtils.mapEnviarMsgTexto(mIdUsuario, mIdAmigo, mensagem),
                     new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                    if (databaseError == null) {
+                            if (databaseError == null) {
 
-                    }
-                }
-            });
+                            }
+                        }
+                    });
         }
-
     }
 
 

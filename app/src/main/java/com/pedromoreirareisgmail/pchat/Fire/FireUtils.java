@@ -153,21 +153,37 @@ public class FireUtils {
         return mapMensagemImagem;
     }
 
+    public static Map<String, Object> mapAddUsuariosChat(String idUsuario, String idAmigo) {
+
+        Map<String, Object> mapDadosChat = new HashMap<>();
+        mapDadosChat.put(Const.CHAT_LIDA, false);
+        mapDadosChat.put(Const.CHAT_TIME, ServerValue.TIMESTAMP);
+
+        Map<String, Object> mapUsuarioChat = new HashMap<>();
+
+        mapUsuarioChat.put(Const.PASTA_CHAT + "/" + idUsuario + "/" + idAmigo, mapDadosChat);
+        mapUsuarioChat.put(Const.PASTA_CHAT + "/" + idAmigo + "/" + idUsuario, mapDadosChat);
+
+        return mapUsuarioChat;
+    }
+
     public static void firebaseSetNull() {
 
         Fire.setAuth();
         Fire.setUsuario();
         Fire.setIdUsuario();
 
-        Fire.setRefAmigo();
         Fire.setRefAmigos();
         Fire.setRefNotificacoes();
         Fire.setRefRoot();
         Fire.setRefSolicitacoes();
         Fire.setRefUsuario();
         Fire.setRefUsuarios();
+
+        Fire.setStorageRefRoot();
         Fire.setStorageRefImgPerfil();
         Fire.setStorageRefImgThumbnail();
-        Fire.setStorageRefRoot();
+        Fire.setStorageRefImgMsg();
+        Fire.setStorageRefImgMsgThumbnail();
     }
 }

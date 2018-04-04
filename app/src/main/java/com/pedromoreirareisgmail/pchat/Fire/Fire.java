@@ -16,12 +16,13 @@ public class Fire {
     private static DatabaseReference refUsuarios;
     private static DatabaseReference refUsuario;
     private static DatabaseReference refSolicitacoes;
-    private static DatabaseReference refAmigo;
     private static DatabaseReference refNotificacoes;
     private static DatabaseReference refAmigos;
     private static StorageReference storageRefRoot;
     private static StorageReference storageRefImgPerfil;
     private static StorageReference storageRefImgThumbnail;
+    private static StorageReference storageRefImgMsg;
+    private static StorageReference storageRefImgMsgThumbnail;
     private static String idUsuario;
 
     public static void setAuth() {
@@ -52,10 +53,6 @@ public class Fire {
         Fire.refSolicitacoes = null;
     }
 
-    public static void setRefAmigo() {
-        Fire.refAmigo = null;
-    }
-
     public static void setRefNotificacoes() {
         Fire.refNotificacoes = null;
     }
@@ -77,6 +74,13 @@ public class Fire {
         Fire.storageRefImgThumbnail = null;
     }
 
+    public static void setStorageRefImgMsg() {
+        Fire.storageRefImgMsg = null;
+    }
+
+    public static void setStorageRefImgMsgThumbnail() {
+        Fire.storageRefImgMsgThumbnail = null;
+    }
 
     public static FirebaseAuth getAuth() {
 
@@ -197,6 +201,26 @@ public class Fire {
         }
 
         return storageRefImgThumbnail;
+    }
+
+    public static StorageReference getStorageRefImgMsg() {
+
+        if (storageRefImgMsg == null) {
+
+            storageRefImgMsg = getStorageRefRoot().child(Const.S_PASTA_IMAGENS_MSG);
+        }
+
+        return storageRefImgMsg;
+    }
+
+    public static StorageReference getStorageRefImgMsgThumbnail() {
+
+        if (storageRefImgMsgThumbnail == null) {
+
+            storageRefImgMsgThumbnail = getStorageRefRoot().child(Const.S_PASTA_IMAGENS_MSG_THUMB);
+        }
+
+        return storageRefImgMsgThumbnail;
     }
 
 }
