@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "577337750424",
+    "firebase_url": "https://pchat-b4525.firebaseio.com",
+    "project_id": "pchat-b4525",
+    "storage_bucket": "pchat-b4525.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577337750424:android:cc8d9c9ee1fd85ad",
+        "android_client_info": {
+          "package_name": "com.pedromoreirareisgmail.pchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "577337750424-1m0262frm4u72mv4gu8cp2k7gqb52dns.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pedromoreirareisgmail.pchat",
+            "certificate_hash": "fc68dd41f2c3f993dc732c988fa43e764d7b13ba"
+          }
+        },
+        {
+          "client_id": "577337750424-0ohtbmg7l8kokvbb3nf1m7sq1j43ss4t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlLXF2DFmngTdYc-lH0vze0iZNxYu82ck"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "577337750424-0ohtbmg7l8kokvbb3nf1m7sq1j43ss4t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

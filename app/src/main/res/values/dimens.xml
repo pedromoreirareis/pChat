@@ -1,0 +1,14 @@
+<resources>
+    <dimen name="margin_background">10dp</dimen>
+    <dimen name="margin_edit_text">24dp</dimen>
+    <dimen name="margin_but_lr">32dp</dimen>
+    <dimen name="padding_edit_text">16dp</dimen>
+    <dimen name="corners_background">16dp</dimen>
+    <dimen name="corners_buts">16dp</dimen>
+    <dimen name="corners_msg">48dp</dimen>
+    <dimen name="coners_online">16dp</dimen>
+    <dimen name="elevation_but">16dp</dimen>
+    <dimen name="size_online">12dp</dimen>
+    <dimen name="coners_cardview">8dp</dimen>
+    <dimen name="elevation_cardview">8dp</dimen>
+</resources>

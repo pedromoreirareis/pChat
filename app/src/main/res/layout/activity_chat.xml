@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pedromoreirareisgmail.pchat.ChatActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorBackGroundChat">
+
+        <include
+            android:id="@+id/toolbar_chat"
+            layout="@layout/toolbar_layout" />
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/srl_chat_refresh"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_chat">
+
+
+            <android.support.v7.widget.RecyclerView
+
+                android:id="@+id/rv_chat_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical">
+
+            </android.support.v7.widget.RecyclerView>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+           android:padding="8dp"
+            android:elevation="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageButton
+                android:id="@+id/ivbut_chat_adicionar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_left"
+                android:contentDescription="@string/image_description_add"
+                android:paddingBottom="12dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"
+                android:src="@drawable/ic_add_a_photo" />
+
+            <EditText
+                android:id="@+id/et_chat_mensagem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorWhite"
+                android:gravity="center_vertical"
+                android:hint="@string/hint_chat_mensagem"
+                android:imeOptions="actionSend"
+                android:paddingBottom="12dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingTop="12dp" />
+
+            <ImageButton
+                android:id="@+id/ivbut_chat_enviar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_right"
+                android:contentDescription="@string/image_description_send"
+                android:paddingBottom="12dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"
+                android:src="@drawable/ic_send" />
+
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

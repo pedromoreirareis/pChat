@@ -1,0 +1,135 @@
+<resources>
+    <string name="app_name">pChat</string>
+
+    // TITULOS
+    <string name="titulo_frag_requests">Solicitações</string>
+    <string name="titulo_frag_chats">Conversas</string>
+    <string name="titulo_frag_friends">Amigos</string>
+    <string name="titulo_register">Criar conta</string>
+    <string name="titulo_status">Status do usuário</string>
+    <string name="titulo_usuarios">Usuários</string>
+    <string name="titulo_profile">Solicitação de Amizade</string>
+    <string name="titulo_settings">Minhas Configurações</string>
+
+    // MENUS
+    <string name="menu_configuracoes">Configurações</string>
+    <string name="menu_usuarios">Usuários</string>
+    <string name="menu_logout">Sair</string>
+    <string name="menu_search">Pesquisar</string>
+
+    // HINTS
+    <string name="hint_nome">Nome</string>
+    <string name="hint_email">E-mail</string>
+    <string name="hint_senha">Senha</string>
+    <string name="hint_chat_mensagem">Digite sua mensagem…</string>
+
+    // MENSAGENS XML
+    <string name="msg_xml_ainda_nao_tem_conta">Ainda não tem conta?</string>
+    <string name="msg_xml_cria_uma_nova_conta">Criar uma nova conta</string>
+    <string name="msg_xml_status_digite_seu_status">Digite seu Status</string>
+    <string name="msg_xml_status_digite_seu_nome">Digite o nome de usuário</string>
+    <string name="msg_xml_amigos">Total de amigos %1$s</string>
+    <string name="msg_xml_amigos_desde">Amigos desde %1$s</string>
+    <string name="msg_xml_nome">Nome</string>
+    <string name="msg_xml_status">Status</string>
+
+
+    // ERROS CONTA USUARIO
+    <string name="erro_register_usuario">Digite o nome do usuário</string>
+    <string name="erro_register_email">Digite um e-mail</string>
+    <string name="erro_start_email">Digite seu e-mail</string>
+    <string name="erro_register_senha">Digite a senha</string>
+    <string name="erro_start_senha">Digite sua senha</string>
+
+    // DIALOGOS TITULO
+    <string name="dialog_titulo_salvando_alteracoes">Salvando alterações</string>
+    <string name="dialog_titulo_carregando_dados">Carregando dados do usuário</string>
+
+
+
+    <string name="dialogo_criar_conta_titulo">Criando sua conta</string>
+    <string name="dialogo_criar_conta_titulo_dados">Salvando dados do usuário</string>
+
+
+    <string name="dialogo_entrar_titulo">Entrando em sua conta</string>
+    <string name="dialogo_pesquisar_usuarios_titulo">Pesquinsando usuários</string>
+
+    <string name="dialog_solicitacoes_titulo_adicionar_amigos">Adicionando aos amigos</string>
+    <string name="dialog_solicitacoes_titulo_cancelar_solicitacao">Cancelando solicitação</string>
+    <string name="dialog_solicitacoes_titulo_aceitar_solicitacao">Aceitando solicitação</string>
+    <string name="dialog_solicitacoes_titulo_desfazer_amizade">Desfazendo Amizade</string>
+    <string name="dialog_solicitacoes_titulo_recusar_amizade">Recusando Amizade</string>
+
+    // DIALOGOS MENSAGENS
+    <string name="dialog_msg_por_favor_aguarde">Por favor, aguarde!!!</string>
+
+
+    <string name="dialogo_criar_conta_msg">Por favor, aguarde enquanto criamos sua conta.</string>
+    <string name="dialogo_criar_conta_msg_dados">Conta criada com sucesso!!! \n\n Por favor, aguarde enquanto salvamos seus dados.</string>
+
+
+    <string name="dialogo_entrar_msg">Por favor, aguarde enquanto verificamos suas credenciais.</string>
+    <string name="dialogo_pesquisando_usuarios_msg">Aguarde!!!</string>
+    <string name="dialogo_carregando_dados_msg">Aguarde!!!</string>
+
+    // ALERT DIALOG
+    <string name="dialogo_amigos_acao_title">Selecione uma opção</string>
+
+    // MENSAGEM
+    <string name="msg_selecione_imagem">Selecione uma Imagem</string>
+    <string name="msg_amigos_desde">Amigos desde %1$s</string>
+    <string name="msg_foto">Mensagem com foto…</string>
+    <string name="msg_nenhuma_msg">Mensagens não encontradas…</string>
+    <string name="msg_tipo_solicitacao_enviada">Solicitação Enviada</string>
+    <string name="msg_tipo_solicitacao_recebida">Solicitação Recebida</string>
+
+
+    // TOAST
+    <string name="toast_alteracoes_sucesso">Alteração efetuada com sucesso!!!</string>
+    <string name="toast_alteracoes_erro">Erro. Alteração não foi bem sucedida. Tente novamente.</string>
+
+
+
+    <string name="toast_register_erro_criar_conta">Desculpe, ocorreu o seguinte erro: %1$s</string>
+    <string name="toast_register_erro_criar_conta_senha">Senha muito fraca</string>
+    <string name="toast_register_erro_criar_conta_msg">erro desconhecido. Tente novamente.</string>
+    <string name="toast_sem_internet">Você não esta conectado a uma rede. Verifique sua conexão…</string>
+    <string name="toast_start_erro_entrar">Ocorreu um erro ao entrar em sua conta…Tente novamente.</string>
+
+
+
+    // DESCRIPTIONS
+    <string name="image_description_settings_nome">Foto do usuário.</string>
+    <string name="image_description_profile_nome">Imagem do Status do usuário.</string>
+    <string name="image_description_online">Imagem determina se usuário está online.</string>
+    <string name="image_description_send">Imagem botão enviar mensagem.</string>
+    <string name="image_description_add">Imagem botão adicionar.</string>
+
+    // BOTÕES
+    <string name="but_settings_imagem">Alterar Imagem</string>
+    <string name="but_settings_status">Alterar Nome / Status</string>
+    <string name="but_status_salvar">Salvar</string>
+    <string name="but_criar_uma_conta">Crie uma conta agora</string>
+    <string name="but_criar_conta">Criar Conta</string>
+    <string name="but_entar_conta">Entrar</string>
+
+    <string name="but_profile_adicionar_amigos">Adicionar aos amigos</string>
+    <string name="but_profile_desfazer_amizade">Desfazer Amizade</string>
+    <string name="but_profile_recusar_amizade">Recusar Amizade</string>
+    <string name="but_profile_recusar">Recusar</string>
+    <string name="but_profile_cancelar_solicitacao">Cancelar Solicitação</string>
+    <string name="but_profile_aceitar_solicitacao">Aceitar Amizade</string>
+    <string name="but_profile_aceitar">Aceitar</string>
+
+    // TEMPO
+    <string name="online">OnLine</string>
+    <string name="time_agora_pouco">Agora a pouco</string>
+    <string name="time_um_minuto">A um minuto atrás</string>
+    <string name="time_minutos_atras">%1$s minutos atrás</string>
+    <string name="time_uma_hora_atras">Uma hora atrás</string>
+    <string name="time_horas_atras">%1$s horas atrás</string>
+    <string name="time_ontem">Ontem</string>
+    <string name="time_dias_atras">%1$s dias atrás</string>
+
+
+</resources>

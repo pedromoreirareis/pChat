@@ -1,0 +1,12 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <stroke
+        android:color="@color/colorOnlineGreen"
+        android:width="2dp"/>
+    <corners
+        android:radius="@dimen/coners_online"/>
+    <solid
+        android:color="@color/colorOnlineGreen"/>
+    <size
+        android:width="@dimen/size_online"
+        android:height="@dimen/size_online"/>
+</shape>

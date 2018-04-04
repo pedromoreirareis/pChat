@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pedromoreirareisgmail.pchat.RegisterActivity$ProfileActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_gradient">
+
+        <include
+            android:id="@+id/toolbar_profile"
+            layout="@layout/toolbar_layout" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/civ_profile_imagem"
+            android:layout_width="0dp"
+            android:layout_height="216dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/image_description_profile_nome"
+            android:elevation="16dp"
+            android:src="@drawable/ic_usuario"
+            app:civ_border_color="@color/colorWhite"
+            app:civ_border_width="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_profile" />
+
+        <TextView
+            android:id="@+id/tv_profile_nome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/colorWhite"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/civ_profile_imagem" />
+
+        <TextView
+            android:id="@+id/tv_profile_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="3"
+            android:textColor="@color/colorWhite"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_profile_nome" />
+
+        <Button
+            android:id="@+id/but_profile_enviar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="96dp"
+            android:layout_marginEnd="@dimen/margin_but_lr"
+            android:layout_marginStart="@dimen/margin_but_lr"
+            android:background="@drawable/but_adicionar"
+            android:elevation="@dimen/elevation_but"
+            android:text="@string/but_profile_adicionar_amigos"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/but_profile_recusar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_but_lr"
+            android:layout_marginEnd="@dimen/margin_but_lr"
+            android:layout_marginStart="@dimen/margin_but_lr"
+            android:background="@drawable/but_recusar"
+            android:elevation="@dimen/elevation_but"
+            android:text="@string/but_profile_recusar_amizade"
+            android:textColor="@color/colorWhite"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

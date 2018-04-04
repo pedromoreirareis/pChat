@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pedromoreirareisgmail.pchat.StartActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/toolbar_start"
+            layout="@layout/toolbar_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_start_email"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_edit_text"
+            android:layout_marginStart="@dimen/margin_edit_text"
+            android:layout_marginTop="120dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_start">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/et_start_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_email"
+                android:inputType="textEmailAddress"
+                android:paddingEnd="@dimen/padding_edit_text"
+                android:paddingStart="@dimen/padding_edit_text" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_start_senha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/til_start_email"
+            app:layout_constraintStart_toStartOf="@+id/til_start_email"
+            app:layout_constraintTop_toBottomOf="@+id/til_start_email">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/et_start_senha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_senha"
+                android:inputType="textPassword"
+                android:paddingEnd="@dimen/padding_edit_text"
+                android:paddingStart="@dimen/padding_edit_text" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/but_start_entar"
+            style="@style/style_but_primary_color"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/but_entar_conta"
+            app:layout_constraintEnd_toEndOf="@+id/til_start_senha"
+            app:layout_constraintStart_toStartOf="@+id/til_start_senha"
+            app:layout_constraintTop_toBottomOf="@+id/til_start_senha" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                android:ellipsize="start"
+                android:gravity="end|center_vertical"
+                android:padding="8dp"
+                android:paddingBottom="@dimen/padding_edit_text"
+                android:paddingTop="@dimen/padding_edit_text"
+                android:text="@string/msg_xml_ainda_nao_tem_conta" />
+
+            <TextView
+                android:id="@+id/tv_start_criar_conta"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:maxLines="1"
+                android:paddingBottom="@dimen/padding_edit_text"
+                android:paddingTop="@dimen/padding_edit_text"
+                android:text="@string/but_criar_uma_conta"
+                android:textColor="@color/colorLink"
+                android:textStyle="bold" />
+
+
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#134FFF</color>
+    <color name="colorPrimaryDark">#0746FF</color>
+    <color name="colorAccent">#724FFF</color>
+
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorBlack">#000000</color>
+
+    <color name="colorAdicionar">#ffffff</color>
+    <color name="colorAceitar">#1CB020</color>
+    <color name="colorRecusar">#ff0000</color>
+    <color name="colorDesfazer">#FF3500</color>
+    <color name="colorCancelarSol">#3372B0</color>
+
+    <color name="colorLink">#0011FF</color>
+    <color name="colorButImagem">#5309F5</color>
+    <color name="colorButStatus">#330AFF</color>
+
+    <color name="colorStartGradient">#2962FF</color>
+    <color name="colorCenterGradient">#255EFF</color>
+    <color name="colorEndGradient">#7B0CE8</color>
+
+
+    <color name="colorEscuro">#252525</color>
+    <color name="colorRed">#ff0000</color>
+    <color name="colorRedBlack">#B00000</color>
+    <color name="colorGreen">#00ff00</color>
+
+    <color name="colorOnlineRed">#ff0000</color>
+    <color name="colorOnlineGreen">#00ff00</color>
+
+    <color name="colorBackGroundChat">#cccccc</color>
+
+</resources>

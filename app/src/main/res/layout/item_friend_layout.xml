@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="@dimen/coners_cardview"
+        app:cardElevation="@dimen/elevation_cardview">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_gradient"
+            android:orientation="horizontal">
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/cl_friend_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/civ_friend_imagem"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/ic_usuario"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_friend_nome"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:ellipsize="end"
+                    android:gravity="top"
+                    android:maxLines="1"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/civ_friend_imagem"
+                    app:layout_constraintTop_toTopOf="@+id/civ_friend_imagem" />
+
+                <ImageView
+                    android:id="@+id/iv_friend_online"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="@string/image_description_online"
+                    android:src="@drawable/online_red"
+                    app:layout_constraintBottom_toBottomOf="@+id/civ_friend_imagem"
+                    app:layout_constraintEnd_toEndOf="@+id/civ_friend_imagem" />
+
+                <TextView
+                    android:id="@+id/tv_friend_status"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:ellipsize="end"
+                    android:gravity="top"
+                    android:maxLines="2"
+                    android:textColor="#bbb"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/civ_friend_imagem"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_friend_nome" />
+
+                <TextView
+                    android:id="@+id/tv_friend_data"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:inputType="time"
+                    android:maxLines="1"
+                    android:textColor="#ccc"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/civ_friend_imagem"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_friend_status"
+                    app:layout_constraintStart_toStartOf="@+id/tv_friend_status" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/ivbut_friend_mais"
+                android:layout_width="48dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="2dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_more" />
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</layout>
