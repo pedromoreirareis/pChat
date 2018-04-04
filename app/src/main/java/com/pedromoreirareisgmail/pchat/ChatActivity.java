@@ -22,13 +22,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
@@ -36,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pedromoreirareisgmail.pchat.Adapters.AdapterMensagem;
+import com.pedromoreirareisgmail.pchat.Fire.Fire;
 import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
 import com.pedromoreirareisgmail.pchat.Models.Mensagem;
 import com.pedromoreirareisgmail.pchat.Utils.Comprimir;
@@ -63,15 +61,12 @@ public class ChatActivity extends AppCompatActivity implements
 
     private static final int TOTAL_MENSAGENS_DOWNLOAD = 100;
     private ActivityChatBinding mBinding;
-    private FirebaseAuth mAuth;
     private DatabaseReference mRefRoot;
-    private DatabaseReference mRefUsuario;
     private DatabaseReference mRefAmigo;
     private DatabaseReference mRefChat;
     private DatabaseReference mRefMensagensAmigo;
     private DatabaseReference mRefChatUsuario;
     private StorageReference mStorageImagens;
-    private FirebaseUser mUsuario;
     private TextView mTvBarNome;
     private TextView mTvBarVisualizacao;
     private CircleImageView mCivImagem;
@@ -108,13 +103,39 @@ public class ChatActivity extends AppCompatActivity implements
 
             mNomeAmigo = getIntent().getStringExtra(Const.INTENT_NOME_AMIGO);
         }
+
+        mContext = ChatActivity.this;
+
         initFirebase();
+
         initViews();
+    }
+
+    private void initFirebase() {
+
+        mIdUsuario = Fire.getIdUsuario();
+
+        mRefRoot = Fire.getRefRoot();
+        mRefRoot.keepSynced(true);
+
+        mRefAmigo =  mRefRoot.child(Const.PASTA_USUARIOS).child(mIdAmigo);
+        mRefAmigo.keepSynced(true);
+
+        mRefChat = mRefRoot.child(Const.PASTA_CHAT);
+        mRefChat.keepSynced(true);
+
+        mRefChatUsuario = mRefRoot.child(Const.PASTA_CHAT).child(mIdUsuario);
+        mRefChatUsuario.keepSynced(true);
+
+        mRefMensagensAmigo = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo);
+        mRefMensagensAmigo.keepSynced(true);
+
+        mStorageImagens = FirebaseStorage.getInstance().getReference();
     }
 
     private void initViews() {
 
-        mContext = ChatActivity.this;
+
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarChat;
         setSupportActionBar(toolbar);
@@ -156,9 +177,9 @@ public class ChatActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
 
-        if (mUsuario != null) {
+        if (Fire.getUsuario() != null) {
 
-            FireUtils.usuarioOnLine(mRefUsuario);
+            FireUtils.usuarioOnLine(Fire.getRefUsuario());
         }
 
         recuperarDadosAmigo();
@@ -166,32 +187,6 @@ public class ChatActivity extends AppCompatActivity implements
         verificarJaTemChatAmigo();
 
         carregarMensagens();
-    }
-
-    private void initFirebase() {
-
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
-        mIdUsuario = mUsuario.getUid();
-
-        mRefRoot = FirebaseDatabase.getInstance().getReference();
-        mRefRoot.keepSynced(true);
-
-        mRefUsuario = mRefRoot.child(Const.PASTA_USUARIOS).child(mIdUsuario);
-
-        mRefAmigo = mRefRoot.child(Const.PASTA_USUARIOS).child(mIdAmigo);
-        mRefAmigo.keepSynced(true);
-
-        mRefChat = mRefRoot.child(Const.PASTA_CHAT);
-        mRefChat.keepSynced(true);
-
-        mRefChatUsuario = mRefRoot.child(Const.PASTA_CHAT).child(mIdUsuario);
-        mRefChatUsuario.keepSynced(true);
-
-        mRefMensagensAmigo = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo);
-        mRefMensagensAmigo.keepSynced(true);
-
-        mStorageImagens = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -416,7 +411,7 @@ public class ChatActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
 
-        FireUtils.ultimaVez(mRefUsuario);
+        FireUtils.ultimaVez(Fire.getRefUsuario());
     }
 
     @Override
@@ -530,13 +525,14 @@ public class ChatActivity extends AppCompatActivity implements
 
         if (!TextUtils.isEmpty(mensagem)) {
 
-            String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
+          /*  String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
             String rootAmigo = Const.PASTA_MENSAGENS + "/" + mIdAmigo + "/" + mIdUsuario + "/";
 
             DatabaseReference pushMsg = mRefRoot.child(Const.PASTA_MENSAGENS)
                     .child(mIdUsuario).child(mIdAmigo).push();
 
             String pushId = pushMsg.getKey();
+
 
             Map<String, Object> mapMensagem = new HashMap<>();
             mapMensagem.put(Const.CHAT_MSG_MENSAGEM, mensagem);
@@ -546,13 +542,16 @@ public class ChatActivity extends AppCompatActivity implements
             mapMensagem.put(Const.CHAT_MSG_TIME, ServerValue.TIMESTAMP);
             mapMensagem.put(Const.CHAT_MSG_ORIGEM, mIdUsuario);
 
+
             Map<String, Object> mapEnviarMensagem = new HashMap<>();
             mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMensagem);
             mapEnviarMensagem.put(rootAmigo + "/" + pushId, mapMensagem);
+            */
 
             mEtMensagem.setText("");
 
-            mRefRoot.updateChildren(mapEnviarMensagem, new DatabaseReference.CompletionListener() {
+            mRefRoot.updateChildren(FireUtils.mapEnviarMsgTexto(mIdUsuario,mIdAmigo,mensagem),
+                    new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 

@@ -239,6 +239,5 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         usuario = null;
         FireUtils.ultimaVez(mRefUsuario);
-
     }
 }
