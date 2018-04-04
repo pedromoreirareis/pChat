@@ -462,11 +462,11 @@ public class ChatActivity extends AppCompatActivity implements
         final byte[] imagem = Comprimir.comprimirImagemNoLA(mContext, filePath, 40);
         final byte[] imagemThumb = Comprimir.comprimirImagemNoLA(mContext, filePath, 1);
 
-        final String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
-        final String rootAmigo = Const.PASTA_MENSAGENS + "/" + mIdAmigo + "/" + mIdUsuario + "/";
+       // final String rootUsuario = Const.PASTA_MENSAGENS + "/" + mIdUsuario + "/" + mIdAmigo + "/";
+       // final String rootAmigo = Const.PASTA_MENSAGENS + "/" + mIdAmigo + "/" + mIdUsuario + "/";
 
-        DatabaseReference pushMsg = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo).push();
-        final String pushId = pushMsg.getKey();
+        //DatabaseReference pushMsg = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo).push();
+        String pushId = FireUtils.pushIdMsg(mIdUsuario,mIdAmigo);
 
         StorageReference storageImagem = mStorageImagens.child(Const.S_PASTA_IMAGENS_MSG).child(pushId + ".jpg");
         final StorageReference storageImagemThumb = mStorageImagens.child(Const.S_PASTA_IMAGENS_MSG_THUMB).child(pushId + ".jpg");
@@ -477,7 +477,7 @@ public class ChatActivity extends AppCompatActivity implements
 
                 if (task.isSuccessful()) {
 
-                    final String urlDownloadImage = task.getResult().getDownloadUrl().toString();
+                    final String urlImage = task.getResult().getDownloadUrl().toString();
 
                     UploadTask uploadTask = storageImagemThumb.putBytes(imagemThumb);
 
@@ -487,8 +487,11 @@ public class ChatActivity extends AppCompatActivity implements
 
                             if (taskThumb.isSuccessful()) {
 
-                                String urlDownloadThumb = taskThumb.getResult().getDownloadUrl().toString();
+                                String urlThumb = taskThumb.getResult().getDownloadUrl().toString();
 
+
+
+                                /*
                                 Map<String, Object> mapMensagem = new HashMap<>();
                                 mapMensagem.put(Const.CHAT_MSG_MENSAGEM, urlDownloadImage);
                                 mapMensagem.put(Const.CHAT_MSG_THUMB, urlDownloadThumb);
@@ -501,7 +504,10 @@ public class ChatActivity extends AppCompatActivity implements
                                 mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMensagem);
                                 mapEnviarMensagem.put(rootAmigo + "/" + pushId, mapMensagem);
 
-                                mRefRoot.updateChildren(mapEnviarMensagem, new DatabaseReference.CompletionListener() {
+                                */
+
+                                mRefRoot.updateChildren(FireUtils.mapEnviarMsgImagem(mIdUsuario,mIdAmigo,urlImage,urlThumb),
+                                        new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 

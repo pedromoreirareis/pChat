@@ -90,16 +90,21 @@ public class FireUtils {
         return Fire.getRefNotificacoes().child(idConvite).push().getKey();
     }
 
-    public static Map<String, Object> mapEnviarMsgTexto(String idUsuario, String idAmigo, String mensagem) {
 
-
-        String rootUsuario = Const.PASTA_MENSAGENS + "/" + idUsuario + "/" + idAmigo + "/";
-        String rootAmigo = Const.PASTA_MENSAGENS + "/" + idAmigo + "/" + idUsuario + "/";
+    public static String pushIdMsg(String idUsuario, String idAmigo) {
 
         DatabaseReference pushMsg = Fire.getRefRoot().child(Const.PASTA_MENSAGENS)
                 .child(idUsuario).child(idAmigo).push();
 
-        String pushId = pushMsg.getKey();
+        return pushMsg.getKey();
+    }
+
+    public static Map<String, Object> mapEnviarMsgTexto(String idUsuario, String idAmigo, String mensagem) {
+
+        String rootUsuario = Const.PASTA_MENSAGENS + "/" + idUsuario + "/" + idAmigo + "/";
+        String rootAmigo = Const.PASTA_MENSAGENS + "/" + idAmigo + "/" + idUsuario + "/";
+
+        String pushId = pushIdMsg(idUsuario, idAmigo);
 
         Map<String, Object> mapEnviarMensagem = new HashMap<>();
         mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMsgTexto(idUsuario, mensagem));
@@ -107,7 +112,6 @@ public class FireUtils {
 
         return mapEnviarMensagem;
     }
-
 
     private static Map<String, Object> mapMsgTexto(String idUsuario, String mensagem) {
 
@@ -122,6 +126,32 @@ public class FireUtils {
         return mapMensagem;
     }
 
+    public static Map<String, Object> mapEnviarMsgImagem(String idUsuario, String idAmigo, String urlImagem, String urlThumb) {
+
+        String rootUsuario = Const.PASTA_MENSAGENS + "/" + idUsuario + "/" + idAmigo + "/";
+        String rootAmigo = Const.PASTA_MENSAGENS + "/" + idAmigo + "/" + idUsuario + "/";
+
+        String pushId = pushIdMsg(idUsuario, idAmigo);
+
+        Map<String, Object> mapEnviarMensagem = new HashMap<>();
+        mapEnviarMensagem.put(rootUsuario + "/" + pushId, mapMsgImagem(idUsuario, urlImagem, urlThumb));
+        mapEnviarMensagem.put(rootAmigo + "/" + pushId, mapMsgImagem(idUsuario, urlImagem, urlThumb));
+
+        return mapEnviarMensagem;
+    }
+
+    private static Map<String, Object> mapMsgImagem(String idUsuario, String urlImage, String urlThumb) {
+
+        Map<String, Object> mapMensagemImagem = new HashMap<>();
+        mapMensagemImagem.put(Const.CHAT_MSG_MENSAGEM, urlImage);
+        mapMensagemImagem.put(Const.CHAT_MSG_THUMB, urlThumb);
+        mapMensagemImagem.put(Const.CHAT_MSG_LIDA, false);
+        mapMensagemImagem.put(Const.CHAT_MSG_TIPO, Const.CHAT_MSG_TIPO_IMAGE);
+        mapMensagemImagem.put(Const.CHAT_MSG_TIME, ServerValue.TIMESTAMP);
+        mapMensagemImagem.put(Const.CHAT_MSG_ORIGEM, idUsuario);
+
+        return mapMensagemImagem;
+    }
 
     public static void firebaseSetNull() {
 
