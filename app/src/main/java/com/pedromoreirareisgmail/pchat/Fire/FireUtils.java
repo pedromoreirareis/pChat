@@ -1,11 +1,11 @@
 package com.pedromoreirareisgmail.pchat.Fire;
 
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class FireUtils {
 
@@ -26,51 +26,52 @@ public class FireUtils {
         refUsuario.child(Const.DB_ON_LINE).setValue(false);
     }
 
-    public static boolean recusarAmizade(DatabaseReference refRoot, String idUsuario, String idConvite) {
 
-        isSucesso = false;
+    public static Map<String,Object> mapRecusarAmizade(String idUsuario, String idConvite){
 
-        HashMap<String, Object> mapRecusar = new HashMap<>();
+        Map<String, Object> mapRecusar = new HashMap<>();
         mapRecusar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
         mapRecusar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario, null);
 
-        refRoot.updateChildren(mapRecusar, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                isSucesso = databaseError == null;
-            }
-        });
-
-        return isSucesso;
+        return mapRecusar;
     }
 
-    public static boolean adicionarAmigos(DatabaseReference refRoot, String idUsuario, String idConvite ){
 
-        isSucesso = false;
 
-        String idNotif = Fire.getRefNotificacoes().child(idConvite).push().getKey();
+    public static Map<String,Object> mapAdicionarAmigos(String idUsuario, String idConvite ){
 
-        HashMap<String, Object> mapNotificacao = new HashMap<>();
+
+        Map<String, Object> mapAdicionar = new HashMap<>();
+        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite + "/" + Const.SOL_TIPO, Const.SOL_TIPO_ENVIADA);
+        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario + "/" + Const.SOL_TIPO, Const.SOL_TIPO_RECEBIDA);
+        mapAdicionar.put(Const.PASTA_NOTIF + "/" + idConvite + "/" + idPushNotf(idConvite) , mapNotifAmizade(idUsuario));
+
+        return mapAdicionar;
+    }
+
+    private static Map<String,Object> mapNotifAmizade(String idUsuario){
+
+        Map<String, Object> mapNotificacao = new HashMap<>();
         mapNotificacao.put(Const.NOTIF_ORIGEM, idUsuario);
         mapNotificacao.put(Const.NOTIF_TIPO, Const.NOTIF_SOLICITADA);
 
-        HashMap<String, Object> mapAdicionar = new HashMap<>();
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite + "/" + Const.SOL_TIPO, Const.SOL_TIPO_ENVIADA);
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario + "/" + Const.SOL_TIPO, Const.SOL_TIPO_RECEBIDA);
-        mapAdicionar.put(Const.PASTA_NOTIF + "/" + idConvite + "/" + idNotif, mapNotificacao);
+        return mapNotificacao;
+    }
 
-        refRoot.updateChildren(mapAdicionar, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+    private static String idPushNotf(String idConvite){
 
-                isSucesso = databaseError == null;
+        return Fire.getRefNotificacoes().child(idConvite).push().getKey();
+    }
 
 
-            }
-        });
+    public static Map<String,Object> mapCancelarSolicitacao(String idUsuario,String idConvite){
 
-        return isSucesso;
+
+        Map<String, Object> mapCancelar = new HashMap<>();
+        mapCancelar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
+        mapCancelar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario, null);
+
+        return mapCancelar;
     }
 
     public static void firebaseSetNull(){
