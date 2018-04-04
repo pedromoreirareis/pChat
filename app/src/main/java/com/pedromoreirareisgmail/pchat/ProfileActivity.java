@@ -115,7 +115,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         if (mIdConvite.equals(mIdUsuario)) {
 
             mIdConvite = mIdUsuario;
-            // te
         }
 
         mRefSolicitacoes = Fire.getRefSolicitacoes();
