@@ -275,13 +275,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_recusar_amizade));
         mDialog.show();
 
-        boolean sucesso = FireUtils.recusarAmizade(Fire.getRefRoot(),mIdUsuario,mIdConvite);
+        boolean isSucesso = FireUtils.recusarAmizade(Fire.getRefRoot(),mIdUsuario,mIdConvite);
 
-        if(sucesso){
+        if(isSucesso){
 
             // NAO AMIGO => BUT FICA: ADICIONAR AMIGO
             mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-            Buts.recusarAmizade(ProfileActivity.this, mButEnviar, mButRecusar);
+            Buts.recusarAmizade(mContext, mButEnviar, mButRecusar);
             mDialog.dismiss();
 
         }else{
@@ -409,13 +409,26 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     private void adicionarAmigos() {
 
-        //TODO FAZER ESTE AGORA
-
         // COMEÇA - NÃO AMIGOS
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_adicionar_amigos));
         mDialog.show();
 
-        String notifId = Fire.getRefNotificacoes().child(mIdConvite).push().getKey();
+        boolean isSucesso = FireUtils.adicionarAmigos(Fire.getRefRoot(),mIdUsuario,mIdConvite);
+
+        if(isSucesso){
+
+            // TERMINA - SOL ENVIADA => BUT FICA: CANCELA SOL AMIZADE
+
+            mEstadoAtual = Const.ESTADO_SOL_ENVIADA;
+            Buts.adicionarAmigos(mContext, mButEnviar, mButRecusar);
+            mDialog.dismiss();
+
+        }else{
+
+            mDialog.dismiss();
+        }
+
+ /*       String notifId = Fire.getRefNotificacoes().child(mIdConvite).push().getKey();
 
         HashMap<String, Object> mapNotificacao = new HashMap<>();
         mapNotificacao.put(Const.NOTIF_ORIGEM, mIdUsuario);
@@ -443,6 +456,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         });
+
+        */
     }
 
     @Override
