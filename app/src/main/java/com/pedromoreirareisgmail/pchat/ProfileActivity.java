@@ -409,6 +409,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     private void adicionarAmigos() {
 
+        //TODO FAZER ESTE AGORA
+
         // COMEÇA - NÃO AMIGOS
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_adicionar_amigos));
         mDialog.show();
