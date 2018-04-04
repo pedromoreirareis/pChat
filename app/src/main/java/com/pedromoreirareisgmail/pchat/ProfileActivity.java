@@ -30,7 +30,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private DatabaseReference mRefUsuarios;
     private DatabaseReference mRefSolicitacoes;
     private DatabaseReference mRefAmigos;
-    private DatabaseReference mRefNotificacoes;
     private DatabaseReference mRefRoot;
     private CircleImageView mCivImagem;
     private TextView mTvNome;
@@ -115,7 +114,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         mRefSolicitacoes = Fire.getRefSolicitacoes();
-        mRefNotificacoes = Fire.getRefNotificacoes();
 
         mRefUsuarios = Fire.getRefUsuarios();
         mRefUsuarios.keepSynced(true);
@@ -172,7 +170,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                                     // SOLICITAÇÃO RECEBIDA => BUT FICA: ACEITAR AMIZADE E RECUSAR AMIZADE
 
                                     mEstadoAtual = Const.ESTADO_SOL_RECEBIDA;
-                                    Buts.solicitacaoRecebida(ProfileActivity.this, mButEnviar, mButRecusar);
+                                    Buts.solicitacaoRecebida(mContext, mButEnviar, mButRecusar);
                                     mDialog.dismiss();
 
                                 } else if (tipo_solicitacao.equals(Const.SOL_TIPO_ENVIADA)) {
@@ -180,7 +178,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                                     // SOLICITAÇÃO RECEBIDA => BUT FICA: CANCELAR AMIZADE
 
                                     mEstadoAtual = Const.ESTADO_SOL_ENVIADA;
-                                    Buts.solicitacaoEnviada(ProfileActivity.this, mButEnviar, mButRecusar);
+                                    Buts.solicitacaoEnviada(mContext, mButEnviar, mButRecusar);
                                     mDialog.dismiss();
                                 }
 
@@ -196,7 +194,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                                             // AMIGOS => BUT FICA: DESFAZER AMIZADE
 
                                             mEstadoAtual = Const.ESTADO_AMIGOS;
-                                            Buts.amigos(ProfileActivity.this, mButEnviar);
+                                            Buts.amigos(mContext, mButEnviar);
                                             mDialog.dismiss();
                                         }
                                     }

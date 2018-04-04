@@ -1,5 +1,6 @@
 package com.pedromoreirareisgmail.pchat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -10,22 +11,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.pedromoreirareisgmail.pchat.Adapters.AdapterPaginas;
 import com.pedromoreirareisgmail.pchat.Fire.Fire;
 import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mBinding;
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUsuario;
-    private DatabaseReference mRefUsuario;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +31,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
 
+        mContext = MainActivity.this;
+
         Toolbar toolbar = (Toolbar) mBinding.toolbarMain;
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.app_name));
 
         TabLayout tab = mBinding.tabsMain;
         ViewPager pagina = mBinding.paginasMain;
-        AdapterPaginas adapterPaginas = new AdapterPaginas(getSupportFragmentManager(), this);
+        AdapterPaginas adapterPaginas = new AdapterPaginas(getSupportFragmentManager(), mContext);
 
         pagina.setAdapter(adapterPaginas);
         pagina.setCurrentItem(1);
@@ -59,34 +55,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        initFirebase();
-
-        if (mUsuario == null) {
+        if (Fire.getUsuario() == null) {
 
             irParaActivityStart();
         } else {
 
-            continueFirebase();
-
-            FireUtils.usuarioOnLine(mRefUsuario);
+            FireUtils.usuarioOnLine(Fire.getRefUsuario());
         }
     }
 
 
-    private void initFirebase() {
-
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
-    }
-
-    private void continueFirebase() {
-
-        mRefUsuario = FirebaseDatabase.getInstance().getReference().child(Const.PASTA_USUARIOS).child(mUsuario.getUid());
-    }
-
     private void irParaActivityStart() {
 
-        Intent startIntent = new Intent(MainActivity.this, StartActivity.class);
+        Intent startIntent = new Intent(mContext, StartActivity.class);
         startActivity(startIntent);
         finish();
     }
@@ -106,18 +87,17 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.action_menu_configuracoes:
 
-                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                Intent settingsIntent = new Intent(mContext, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
 
             case R.id.action_menu_sair:
 
 
-                if (mUsuario != null) {
+                if (Fire.getUsuario() != null) {
 
-                    FireUtils.usuarioOffLine(mRefUsuario);
+                    FireUtils.usuarioOffLine(Fire.getRefUsuario());
                     Fire.getAuth().signOut();
-
                     FireUtils.firebaseSetNull();
 
                     irParaActivityStart();
@@ -128,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.action_menu_usuarios:
 
-                Intent usuariosIntent = new Intent(MainActivity.this, UsersActivity.class);
+                Intent usuariosIntent = new Intent(mContext, UsersActivity.class);
                 startActivity(usuariosIntent);
                 return true;
 
@@ -141,9 +121,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        if (mUsuario != null) {
+        if (Fire.getUsuario() != null) {
 
-            FireUtils.ultimaVez(mRefUsuario);
+            FireUtils.ultimaVez(Fire.getRefUsuario());
         }
     }
 }
