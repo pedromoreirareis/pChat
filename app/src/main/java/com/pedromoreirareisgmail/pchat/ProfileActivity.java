@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pedromoreirareisgmail.pchat.Fire.Fire;
 import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
@@ -22,8 +21,6 @@ import com.pedromoreirareisgmail.pchat.Utils.Buts;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
 import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityProfileBinding;
-
-import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -269,177 +266,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void recusarAmizade() {
-
-        // ESTA SOLICITACAO RECEBIDA
-        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_recusar_amizade));
-        mDialog.show();
-
-        mRefRoot.updateChildren(FireUtils.mapRecusarAmizade(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // NAO AMIGO => BUT FICA: ADICIONAR AMIGO
-                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-                    Buts.recusarAmizade(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-
-
-        /*
-        final HashMap<String, Object> mapRecusar = new HashMap<>();
-        mapRecusar.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + mIdConvite, null);
-        mapRecusar.put(Const.PASTA_SOLIC + "/" + mIdConvite + "/" + mIdUsuario, null);
-
-        mRefRoot.updateChildren(mapRecusar, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // NAO AMIGO => BUT FICA: ADICIONAR AMIGO
-                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-                    Buts.recusarAmizade(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-        */
-    }
-
-    private void desfazerAmizade() {
-
-        // ESTA AMIGOS
-        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_desfazer_amizade));
-        mDialog.show();
-
-        HashMap<String, Object> mapDesfazer = new HashMap<>();
-        mapDesfazer.put(Const.PASTA_AMIGOS + "/" + mIdUsuario + "/" + mIdConvite, null);
-        mapDesfazer.put(Const.PASTA_AMIGOS + "/" + mIdConvite + "/" + mIdUsuario, null);
-
-        mRefRoot.updateChildren(mapDesfazer, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // TERMINA NAO AMIGO => BUT FICA: ADICIONAR AMIGO
-                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-                    Buts.desfazerAmizade(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-
-    }
-
-    private void aceitarSolicitacao() {
-
-        // COMEÇA SOLICITAÇÃO RECEBIDA - ACEITAR
-        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_aceitar_solicitacao));
-        mDialog.show();
-
-        HashMap<String, Object> mapAmigos = new HashMap<>();
-        mapAmigos.put(Const.PASTA_AMIGOS + "/" + mIdUsuario + "/" + mIdConvite + "/" + Const.DATA, ServerValue.TIMESTAMP);
-        mapAmigos.put(Const.PASTA_AMIGOS + "/" + mIdConvite + "/" + mIdUsuario + "/" + Const.DATA, ServerValue.TIMESTAMP);
-
-        mapAmigos.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + mIdConvite, null);
-        mapAmigos.put(Const.PASTA_SOLIC + "/" + mIdConvite + "/" + mIdUsuario, null);
-
-        mRefRoot.updateChildren(mapAmigos, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // TERMINA - AMIGOS => BUT FICA: DESFAZER AMIZADE
-                    mEstadoAtual = Const.ESTADO_AMIGOS;
-                    Buts.aceitarSolicitacao(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-
-    }
-
-    private void cancelarSolicitacao() {
-
-        // COMEÇA SOLICITACAO ENVIADA
-        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_cancelar_solicitacao));
-        mDialog.show();
-
-        mRefRoot.updateChildren(FireUtils.mapCancelarSolicitacao(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // TERMINA - NAO AMIGO => BUT FICA: ADICIONAR AMIGO
-                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-                    Buts.cancelarSolicitacao(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-
-
-        /*
-        HashMap<String, Object> mapCancelar = new HashMap<>();
-        mapCancelar.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + mIdConvite, null);
-        mapCancelar.put(Const.PASTA_SOLIC + "/" + mIdConvite + "/" + mIdUsuario, null);
-
-        mRefRoot.updateChildren(mapCancelar, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                if (databaseError == null) {
-
-                    // TERMINA - NAO AMIGO => BUT FICA: ADICIONAR AMIGO
-                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
-                    Buts.cancelarSolicitacao(ProfileActivity.this, mButEnviar, mButRecusar);
-                    mDialog.dismiss();
-
-                } else {
-
-                    mDialog.dismiss();
-                }
-            }
-        });
-
-        */
-
-    }
 
     private void adicionarAmigos() {
 
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_adicionar_amigos));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapAdicionarAmigos(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapAdicionar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -455,27 +288,21 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         });
+    }
 
- /*       String notifId = Fire.getRefNotificacoes().child(mIdConvite).push().getKey();
+    private void cancelarSolicitacao() {
 
-        HashMap<String, Object> mapNotificacao = new HashMap<>();
-        mapNotificacao.put(Const.NOTIF_ORIGEM, mIdUsuario);
-        mapNotificacao.put(Const.NOTIF_TIPO, Const.NOTIF_SOLICITADA);
+        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_cancelar_solicitacao));
+        mDialog.show();
 
-        HashMap<String, Object> mapAdicionar = new HashMap<>();
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + mIdConvite + "/" + Const.SOL_TIPO, Const.SOL_TIPO_ENVIADA);
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + mIdConvite + "/" + mIdUsuario + "/" + Const.SOL_TIPO, Const.SOL_TIPO_RECEBIDA);
-        mapAdicionar.put(Const.PASTA_NOTIF + "/" + mIdConvite + "/" + notifId, mapNotificacao);
-
-        mRefRoot.updateChildren(mapAdicionar, new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapCancelar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
                 if (databaseError == null) {
 
-                    // TERMINA - SOL ENVIADA => BUT FICA: CANCELA SOL AMIZADE
-                    mEstadoAtual = Const.ESTADO_SOL_ENVIADA;
-                    Buts.adicionarAmigos(ProfileActivity.this, mButEnviar, mButRecusar);
+                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
+                    Buts.cancelarSolicitacao(mContext, mButEnviar, mButRecusar);
                     mDialog.dismiss();
 
                 } else {
@@ -485,7 +312,77 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
 
-        */
+    }
+
+    private void aceitarSolicitacao() {
+
+        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_aceitar_solicitacao));
+        mDialog.show();
+
+        mRefRoot.updateChildren(FireUtils.mapAceitar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                if (databaseError == null) {
+
+                    mEstadoAtual = Const.ESTADO_AMIGOS;
+                    Buts.aceitarSolicitacao(mContext, mButEnviar, mButRecusar);
+                    mDialog.dismiss();
+
+                } else {
+
+                    mDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    private void recusarAmizade() {
+
+        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_recusar_amizade));
+        mDialog.show();
+
+        mRefRoot.updateChildren(FireUtils.mapRecusar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                if (databaseError == null) {
+
+                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
+                    Buts.recusarAmizade(mContext, mButEnviar, mButRecusar);
+                    mDialog.dismiss();
+
+                } else {
+
+                    mDialog.dismiss();
+                }
+            }
+        });
+
+    }
+
+    private void desfazerAmizade() {
+
+        mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_desfazer_amizade));
+        mDialog.show();
+
+        mRefRoot.updateChildren(FireUtils.mapDesfazer(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                if (databaseError == null) {
+
+                    mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
+                    Buts.desfazerAmizade(mContext, mButEnviar, mButRecusar);
+                    mDialog.dismiss();
+
+                } else {
+
+                    mDialog.dismiss();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -497,7 +394,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             mDialog.dismiss();
         }
     }
-
 
     @Override
     protected void onStop() {

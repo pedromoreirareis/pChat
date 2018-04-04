@@ -26,8 +26,38 @@ public class FireUtils {
         refUsuario.child(Const.DB_ON_LINE).setValue(false);
     }
 
+    public static Map<String,Object> mapAdicionar(String idUsuario, String idConvite ){
 
-    public static Map<String,Object> mapRecusarAmizade(String idUsuario, String idConvite){
+        Map<String, Object> mapAdicionar = new HashMap<>();
+        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite + "/" + Const.SOL_TIPO, Const.SOL_TIPO_ENVIADA);
+        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario + "/" + Const.SOL_TIPO, Const.SOL_TIPO_RECEBIDA);
+        mapAdicionar.put(Const.PASTA_NOTIF + "/" + idConvite + "/" + idPushNotfAmizade(idConvite) , mapNotifAmizade(idUsuario));
+
+        return mapAdicionar;
+    }
+
+    public static Map<String,Object> mapCancelar(String idUsuario,String idConvite){
+
+        Map<String, Object> mapCancelar = new HashMap<>();
+        mapCancelar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
+        mapCancelar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario, null);
+
+        return mapCancelar;
+    }
+
+    public  static Map<String, Object> mapAceitar(String idUsuario,String idConvite){
+
+        Map<String, Object> mapAmigos = new HashMap<>();
+        mapAmigos.put(Const.PASTA_AMIGOS + "/" + idUsuario + "/" + idConvite + "/" + Const.DATA, ServerValue.TIMESTAMP);
+        mapAmigos.put(Const.PASTA_AMIGOS + "/" + idConvite + "/" + idUsuario + "/" + Const.DATA, ServerValue.TIMESTAMP);
+
+        mapAmigos.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
+        mapAmigos.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario, null);
+
+        return mapAmigos;
+    }
+
+    public static Map<String,Object> mapRecusar(String idUsuario, String idConvite){
 
         Map<String, Object> mapRecusar = new HashMap<>();
         mapRecusar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
@@ -37,16 +67,13 @@ public class FireUtils {
     }
 
 
+    public static Map<String,Object> mapDesfazer(String idUsuario, String idConvite){
 
-    public static Map<String,Object> mapAdicionarAmigos(String idUsuario, String idConvite ){
+        Map<String, Object> mapDesfazer = new HashMap<>();
+        mapDesfazer.put(Const.PASTA_AMIGOS + "/" + idUsuario + "/" + idConvite, null);
+        mapDesfazer.put(Const.PASTA_AMIGOS + "/" + idConvite + "/" + idUsuario, null);
 
-
-        Map<String, Object> mapAdicionar = new HashMap<>();
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite + "/" + Const.SOL_TIPO, Const.SOL_TIPO_ENVIADA);
-        mapAdicionar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario + "/" + Const.SOL_TIPO, Const.SOL_TIPO_RECEBIDA);
-        mapAdicionar.put(Const.PASTA_NOTIF + "/" + idConvite + "/" + idPushNotf(idConvite) , mapNotifAmizade(idUsuario));
-
-        return mapAdicionar;
+        return mapDesfazer;
     }
 
     private static Map<String,Object> mapNotifAmizade(String idUsuario){
@@ -58,20 +85,9 @@ public class FireUtils {
         return mapNotificacao;
     }
 
-    private static String idPushNotf(String idConvite){
+    private static String idPushNotfAmizade(String idConvite){
 
         return Fire.getRefNotificacoes().child(idConvite).push().getKey();
-    }
-
-
-    public static Map<String,Object> mapCancelarSolicitacao(String idUsuario,String idConvite){
-
-
-        Map<String, Object> mapCancelar = new HashMap<>();
-        mapCancelar.put(Const.PASTA_SOLIC + "/" + idUsuario + "/" + idConvite, null);
-        mapCancelar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + idUsuario, null);
-
-        return mapCancelar;
     }
 
     public static void firebaseSetNull(){
