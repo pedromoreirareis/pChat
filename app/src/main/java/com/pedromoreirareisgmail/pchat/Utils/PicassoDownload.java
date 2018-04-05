@@ -16,7 +16,7 @@ public class PicassoDownload {
         Picasso.with(context)
                 .load(urlImagem)
                 .networkPolicy(NetworkPolicy.OFFLINE)
-                .placeholder(context.getDrawable(drawable))
+                .placeholder(context.getResources().getDrawable(drawable))
                 .into(civImagem, new Callback() {
                     @Override
                     public void onSuccess() {
@@ -28,7 +28,7 @@ public class PicassoDownload {
 
                         Picasso.with(context)
                                 .load(urlImagem)
-                                .placeholder(context.getDrawable(drawable))
+                                .placeholder(context.getResources().getDrawable(drawable))
                                 .into(civImagem);
                     }
                 });

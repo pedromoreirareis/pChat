@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,23 +17,19 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.pedromoreirareisgmail.pchat.Fire.Fire;
+import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
 import com.pedromoreirareisgmail.pchat.Models.Solicitacao;
+import com.pedromoreirareisgmail.pchat.Models.Usuario;
 import com.pedromoreirareisgmail.pchat.R;
+import com.pedromoreirareisgmail.pchat.Utils.Buts;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
+import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.FragmentRequestsBinding;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
-
-import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -44,9 +39,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class RequestsFragment extends Fragment {
 
     private FragmentRequestsBinding mBinding;
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUsuario;
-    private DatabaseReference mRefRoot;
     private DatabaseReference mRefSolicitacao;
     private DatabaseReference mRefUsuarios;
     private FirebaseRecyclerAdapter mAdapter;
@@ -55,6 +47,7 @@ public class RequestsFragment extends Fragment {
     private String mIdUsuario;
     private ProgressDialog mDialog;
     private Context mContext;
+    private Usuario usuario;
 
 
     public RequestsFragment() {
@@ -75,6 +68,8 @@ public class RequestsFragment extends Fragment {
 
         mContext = getContext();
 
+        usuario = new Usuario();
+
         mRecyclerView = mBinding.rvRequestFragList;
 
         mLLManager = new LinearLayoutManager(mContext);
@@ -84,23 +79,19 @@ public class RequestsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLLManager);
 
         mDialog = new ProgressDialog(mContext);
-        mDialog.setMessage( mContext.getString(R.string.dialog_msg_por_favor_aguarde));
+        mDialog.setMessage(mContext.getString(R.string.dialog_msg_por_favor_aguarde));
         mDialog.setCanceledOnTouchOutside(false);
         mDialog.setCancelable(false);
     }
 
     private void initFirebase() {
 
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
-        mIdUsuario = mUsuario.getUid();
+        mIdUsuario = Fire.getIdUsuario();
 
-        mRefRoot = FirebaseDatabase.getInstance().getReference();
-
-        mRefUsuarios = mRefRoot.child(Const.PASTA_USUARIOS);
+        mRefUsuarios = Fire.getRefUsuarios();
         mRefUsuarios.keepSynced(true);
 
-        mRefSolicitacao = mRefRoot.child(Const.PASTA_SOLIC).child(mIdUsuario);
+        mRefSolicitacao = Fire.getRefSolicitacoes().child(mIdUsuario);
         mRefSolicitacao.keepSynced(true);
     }
 
@@ -124,32 +115,24 @@ public class RequestsFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull final SolicitacaoViewHolder holder, int position, @NonNull Solicitacao model) {
 
-
                 final String idConvite = getRef(position).getKey();
 
+                // SOLICITACAO ENVIADA
                 if (model.getTipo_solicitacao().equals(Const.SOL_TIPO_ENVIADA)) {
 
-                    holder.setTvTipo(mContext.getString(R.string.msg_tipo_solicitacao_enviada));
+                    holder.setTipo(mContext.getString(R.string.msg_tipo_solicitacao_enviada));
 
                     mRefUsuarios.child(idConvite).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
+                            usuario = dataSnapshot.getValue(Usuario.class);
 
-                            String nome = dataSnapshot.child(Const.DB_NOME).getValue().toString();
-                            String status = dataSnapshot.child(Const.DB_STATUS).getValue().toString();
-                            String thumbnail = dataSnapshot.child(Const.DB_THUMB).getValue().toString();
+                            holder.setNome(usuario.getNome());
+                            holder.setStatus(usuario.getStatus());
+                            holder.setImagem(usuario.getThumbnail());
 
-                            holder.setTvNome(nome);
-                            holder.setTvStatus(status);
-                            holder.setImagem(thumbnail, mContext);
-
-
-                            holder.butAceitar.setBackgroundResource(R.drawable.but_cancelar_sol);
-                            holder.butAceitar.setText(mContext.getString(R.string.but_profile_cancelar_solicitacao));
-                            holder.butAceitar.setVisibility(View.VISIBLE);
-
-                            holder.butRecusar.setVisibility(View.GONE);
+                            Buts.fragRequestSolEnviada(holder, mContext);
 
                             holder.butAceitar.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -158,24 +141,21 @@ public class RequestsFragment extends Fragment {
                                     mDialog.setTitle(mContext.getString(R.string.dialog_solicitacoes_titulo_cancelar_solicitacao));
                                     mDialog.show();
 
-                                    HashMap<String, Object> mapCancelar = new HashMap<>();
-                                    mapCancelar.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + idConvite, null);
-                                    mapCancelar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + mIdUsuario, null);
+                                    Fire.getRefRoot().updateChildren(FireUtils.mapCancelar(mIdUsuario, idConvite),
+                                            new DatabaseReference.CompletionListener() {
+                                                @Override
+                                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                    mRefRoot.updateChildren(mapCancelar, new DatabaseReference.CompletionListener() {
-                                        @Override
-                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                    if (databaseError == null) {
 
-                                            if (databaseError == null) {
+                                                        mDialog.dismiss();
 
-                                                mDialog.dismiss();
+                                                    } else {
 
-                                            } else {
-
-                                                mDialog.dismiss();
-                                            }
-                                        }
-                                    });
+                                                        mDialog.dismiss();
+                                                    }
+                                                }
+                                            });
                                 }
                             });
                         }
@@ -186,27 +166,23 @@ public class RequestsFragment extends Fragment {
                         }
                     });
 
-
+                    // SOLICITACAO RECEBIDA
                 } else {
 
-                    holder.setTvTipo(mContext.getString(R.string.msg_tipo_solicitacao_recebida));
+                    holder.setTipo(mContext.getString(R.string.msg_tipo_solicitacao_recebida));
 
 
                     mRefUsuarios.child(idConvite).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            String nome = dataSnapshot.child(Const.DB_NOME).getValue().toString();
-                            String status = dataSnapshot.child(Const.DB_STATUS).getValue().toString();
-                            String thumbnail = dataSnapshot.child(Const.DB_THUMB).getValue().toString();
+                            Buts.fragRequestSolRecebida(holder, mContext);
 
-                            holder.setTvNome(nome);
-                            holder.setTvStatus(status);
-                            holder.setImagem(thumbnail,mContext);
+                            usuario = dataSnapshot.getValue(Usuario.class);
 
-                            holder.butAceitar.setBackgroundResource(R.drawable.but_aceitar);
-                            holder.butAceitar.setText(mContext.getString(R.string.but_profile_aceitar_solicitacao));
-                            holder.butAceitar.setVisibility(View.VISIBLE);
+                            holder.setNome(usuario.getNome());
+                            holder.setStatus(usuario.getStatus());
+                            holder.setImagem(usuario.getThumbnail());
 
                             holder.butAceitar.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -215,34 +191,24 @@ public class RequestsFragment extends Fragment {
                                     mDialog.setTitle(mContext.getString(R.string.dialog_solicitacoes_titulo_aceitar_solicitacao));
                                     mDialog.show();
 
-                                    HashMap<String, Object> mapAmigos = new HashMap<>();
-                                    mapAmigos.put(Const.PASTA_AMIGOS + "/" + mIdUsuario + "/" + idConvite + "/" + Const.DATA, ServerValue.TIMESTAMP);
-                                    mapAmigos.put(Const.PASTA_AMIGOS + "/" + idConvite + "/" + mIdUsuario + "/" + Const.DATA, ServerValue.TIMESTAMP);
+                                    Fire.getRefRoot().updateChildren(FireUtils.mapAceitar(mIdUsuario, idConvite),
+                                            new DatabaseReference.CompletionListener() {
+                                                @Override
+                                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                    mapAmigos.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + idConvite, null);
-                                    mapAmigos.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + mIdUsuario, null);
+                                                    if (databaseError == null) {
 
-                                    mRefRoot.updateChildren(mapAmigos, new DatabaseReference.CompletionListener() {
-                                        @Override
-                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                        mDialog.dismiss();
 
-                                            if (databaseError == null) {
+                                                    } else {
 
-                                                mDialog.dismiss();
-
-                                            } else {
-
-                                                mDialog.dismiss();
-                                            }
-                                        }
-                                    });
+                                                        mDialog.dismiss();
+                                                    }
+                                                }
+                                            });
 
                                 }
                             });
-
-                            holder.butRecusar.setBackgroundResource(R.drawable.but_recusar);
-                            holder.butRecusar.setText(mContext.getString(R.string.but_profile_recusar_amizade));
-                            holder.butRecusar.setVisibility(View.VISIBLE);
 
                             holder.butRecusar.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -251,24 +217,21 @@ public class RequestsFragment extends Fragment {
                                     mDialog.setTitle(mContext.getString(R.string.dialog_solicitacoes_titulo_recusar_amizade));
                                     mDialog.show();
 
-                                    final HashMap<String, Object> mapRecusar = new HashMap<>();
-                                    mapRecusar.put(Const.PASTA_SOLIC + "/" + mIdUsuario + "/" + idConvite, null);
-                                    mapRecusar.put(Const.PASTA_SOLIC + "/" + idConvite + "/" + mIdUsuario, null);
+                                    Fire.getRefRoot().updateChildren(FireUtils.mapRecusar(mIdUsuario, idConvite),
+                                            new DatabaseReference.CompletionListener() {
+                                                @Override
+                                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                    mRefRoot.updateChildren(mapRecusar, new DatabaseReference.CompletionListener() {
-                                        @Override
-                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                    if (databaseError == null) {
 
-                                            if (databaseError == null) {
+                                                        mDialog.dismiss();
 
-                                                mDialog.dismiss();
+                                                    } else {
 
-                                            } else {
-
-                                                mDialog.dismiss();
-                                            }
-                                        }
-                                    });
+                                                        mDialog.dismiss();
+                                                    }
+                                                }
+                                            });
                                 }
                             });
                         }
@@ -321,47 +284,28 @@ public class RequestsFragment extends Fragment {
             butRecusar = itemView.findViewById(R.id.but_request_recusar);
         }
 
-        public void setTvNome(String nome) {
+        public void setNome(String nome) {
 
             tvNome.setText(nome);
         }
 
-        public void setTvStatus(String status) {
+        public void setStatus(String status) {
 
             tvStatus.setText(status);
         }
 
-        public void setTvTipo(String tipo) {
+        public void setTipo(String tipo) {
 
             tvTipo.setText(tipo);
         }
 
-        public void setImagem(final String urlImagem, final Context context) {
+        public void setImagem(final String urlImagem) {
 
             if (!urlImagem.equals(Const.DB_REG_THUMB)) {
 
-                if (!TextUtils.isEmpty(urlImagem)) {
-                    Picasso.with(context)
-                            .load(urlImagem)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .placeholder(context.getResources().getDrawable(R.drawable.ic_usuario))
-                            .into(civImagem, new Callback() {
-                                @Override
-                                public void onSuccess() {
-
-                                }
-
-                                @Override
-                                public void onError() {
-
-                                    Picasso.with(context)
-                                            .load(urlImagem)
-                                            .placeholder(context.getResources().getDrawable(R.drawable.ic_usuario))
-                                            .into(civImagem);
-                                }
-                            });
-                }
+                PicassoDownload.civChachePlaceholder(mContext, urlImagem, R.drawable.ic_usuario, civImagem);
             }
         }
     }
 }
+

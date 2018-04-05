@@ -17,24 +17,21 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.pedromoreirareisgmail.pchat.ChatActivity;
+import com.pedromoreirareisgmail.pchat.Fire.Fire;
 import com.pedromoreirareisgmail.pchat.Models.Chat;
+import com.pedromoreirareisgmail.pchat.Models.Usuario;
 import com.pedromoreirareisgmail.pchat.R;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
 import com.pedromoreirareisgmail.pchat.Utils.GetDateTime;
+import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.FragmentChatsBinding;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -44,9 +41,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatsFragment extends Fragment {
 
     private FragmentChatsBinding mBinding;
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUsuario;
-    private DatabaseReference mRefRoot;
     private DatabaseReference mRefChat;
     private DatabaseReference mRefMensagens;
     private DatabaseReference mRefUsuarios;
@@ -55,6 +49,7 @@ public class ChatsFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private String mIdUsuario;
     private Context mContext;
+    private Usuario usuario;
 
 
     public ChatsFragment() {
@@ -75,6 +70,8 @@ public class ChatsFragment extends Fragment {
 
         mContext = getContext();
 
+        usuario = new Usuario();
+
         mLLManager = new LinearLayoutManager(mContext);
         mLLManager.setReverseLayout(true);
         mLLManager.setStackFromEnd(true);
@@ -86,19 +83,15 @@ public class ChatsFragment extends Fragment {
 
     private void initFirebase() {
 
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
-        mIdUsuario = mUsuario.getUid();
+        mIdUsuario = Fire.getIdUsuario();
 
-        mRefRoot = FirebaseDatabase.getInstance().getReference();
-
-        mRefChat = mRefRoot.child(Const.PASTA_CHAT).child(mIdUsuario);
+        mRefChat = Fire.getRefChat().child(mIdUsuario);
         mRefChat.keepSynced(true);
 
-        mRefUsuarios = mRefRoot.child(Const.PASTA_USUARIOS);
+        mRefUsuarios = Fire.getRefUsuarios();
         mRefUsuarios.keepSynced(true);
 
-        mRefMensagens = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario);
+        mRefMensagens = Fire.getRefMensagens().child(mIdUsuario);
         mRefMensagens.keepSynced(true);
     }
 
@@ -125,7 +118,7 @@ public class ChatsFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull final ChatViewHolder holder, int position, @NonNull Chat model) {
 
-                String idAmigo = getRef(position).getKey();
+                final String idAmigo = getRef(position).getKey();
 
                 Query queryUltimaMensagem = mRefMensagens.child(idAmigo).limitToLast(1);
 
@@ -143,18 +136,18 @@ public class ChatsFragment extends Fragment {
 
                                 case Const.CHAT_MSG_TIPO_TEXT:
 
-                                    holder.setTvMensagem(mensagem);
+                                    holder.setMensagem(mensagem);
                                     holder.ivFoto.setVisibility(View.GONE);
                                     break;
 
                                 case Const.CHAT_MSG_TIPO_IMAGE:
 
-                                    holder.setTvMensagem(mContext.getString(R.string.msg_foto));
+                                    holder.setMensagem(mContext.getString(R.string.msg_foto));
                                     holder.ivFoto.setVisibility(View.VISIBLE);
                                     break;
 
                                 default:
-                                    holder.setTvMensagem(mContext.getString(R.string.msg_nenhuma_msg));
+                                    holder.setMensagem(mContext.getString(R.string.msg_nenhuma_msg));
                                     holder.ivFoto.setVisibility(View.GONE);
                                     break;
                             }
@@ -184,21 +177,15 @@ public class ChatsFragment extends Fragment {
 
                         if (dataSnapshot != null) {
 
-                            final String nome = dataSnapshot.child(Const.DB_NOME).getValue().toString();
-                            holder.setTvNome(nome);
+                            usuario = dataSnapshot.getValue(Usuario.class);
 
-                            String thumb = dataSnapshot.child(Const.DB_THUMB).getValue().toString();
-                            holder.setCivImagem(thumb,mContext);
-
+                            holder.setNome(usuario.getNome());
+                            holder.setImagem(usuario.getThumbnail());
 
                             if (dataSnapshot.hasChild(Const.DB_ON_LINE)) {
 
-                                boolean online = (boolean) dataSnapshot.child(Const.DB_ON_LINE).getValue();
-                                long time = (long) dataSnapshot.child(Const.DB_ULT_VEZ).getValue();
-                                holder.setIvOnline(online, time, mContext);
+                                holder.setOnline(usuario.getOnline(), usuario.getUltima(), mContext);
                             }
-
-                            final String idAmigo = dataSnapshot.getKey();
 
                             holder.itemView.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -206,7 +193,7 @@ public class ChatsFragment extends Fragment {
 
                                     Intent chatIntent = new Intent(mContext, ChatActivity.class);
                                     chatIntent.putExtra(Const.INTENT_ID_AMIGO, idAmigo);
-                                    chatIntent.putExtra(Const.INTENT_NOME_AMIGO, nome);
+                                    chatIntent.putExtra(Const.INTENT_NOME_AMIGO, usuario.getNome());
                                     startActivity(chatIntent);
                                 }
                             });
@@ -261,43 +248,26 @@ public class ChatsFragment extends Fragment {
             ivFoto = itemView.findViewById(R.id.iv_chat_foto);
         }
 
-        public void setCivImagem(final String urlImagem, final Context context) {
+        public void setImagem(final String urlImagem) {
 
             if (!urlImagem.equals(Const.DB_REG_THUMB)) {
 
-                Picasso.with(context)
-                        .load(urlImagem)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .placeholder(mContext.getResources().getDrawable(R.drawable.ic_usuario))
-                        .into(civImagem, new Callback() {
-                            @Override
-                            public void onSuccess() {
+                PicassoDownload.civChachePlaceholder(mContext,urlImagem,R.drawable.ic_usuario,civImagem);
 
-                            }
-
-                            @Override
-                            public void onError() {
-
-                                Picasso.with(context)
-                                        .load(urlImagem)
-                                        .placeholder(mContext.getResources().getDrawable(R.drawable.ic_usuario))
-                                        .into(civImagem);
-                            }
-                        });
             }
         }
 
-        public void setTvNome(String nome) {
+        public void setNome(String nome) {
 
             tvNome.setText(nome);
         }
 
-        public void setTvMensagem(String mensagem) {
+        public void setMensagem(String mensagem) {
 
             tvMensagem.setText(mensagem);
         }
 
-        public void setIvOnline(boolean online, long time, Context context) {
+        public void setOnline(boolean online, long time, Context context) {
 
             if (online) {
 

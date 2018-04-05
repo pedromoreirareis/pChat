@@ -179,6 +179,8 @@ public class FireUtils {
         Fire.setRefSolicitacoes();
         Fire.setRefUsuario();
         Fire.setRefUsuarios();
+        Fire.setRefChat();
+        Fire.setRefMensagens();
 
         Fire.setStorageRefRoot();
         Fire.setStorageRefImgPerfil();

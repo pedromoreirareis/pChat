@@ -45,7 +45,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <ImageButton
-                android:id="@+id/ivbut_chat_adicionar"
+                android:id="@+id/ivbut_chat_enviar_arqvuivo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_white_left"
@@ -71,7 +71,7 @@
                 android:paddingTop="12dp" />
 
             <ImageButton
-                android:id="@+id/ivbut_chat_enviar"
+                android:id="@+id/ivbut_chat_enviar_mensagem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_white_right"

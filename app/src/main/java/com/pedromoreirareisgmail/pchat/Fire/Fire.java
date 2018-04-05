@@ -18,6 +18,8 @@ public class Fire {
     private static DatabaseReference refSolicitacoes;
     private static DatabaseReference refNotificacoes;
     private static DatabaseReference refAmigos;
+    private static DatabaseReference refChat;
+    private static DatabaseReference refMensagens;
     private static StorageReference storageRefRoot;
     private static StorageReference storageRefImgPerfil;
     private static StorageReference storageRefImgThumbnail;
@@ -69,7 +71,6 @@ public class Fire {
         Fire.storageRefImgPerfil = null;
     }
 
-
     public static void setStorageRefImgThumbnail() {
         Fire.storageRefImgThumbnail = null;
     }
@@ -80,6 +81,14 @@ public class Fire {
 
     public static void setStorageRefImgMsgThumbnail() {
         Fire.storageRefImgMsgThumbnail = null;
+    }
+
+    public static void setRefChat() {
+        Fire.refChat = null;
+    }
+
+    public static void setRefMensagens() {
+        Fire.refMensagens = null;
     }
 
     public static FirebaseAuth getAuth() {
@@ -172,6 +181,31 @@ public class Fire {
         }
         return refNotificacoes;
     }
+
+    public static DatabaseReference getRefChat() {
+
+        if (refChat == null) {
+
+            refChat = getRefRoot().child(Const.PASTA_CHAT);
+
+        }
+        return refChat;
+    }
+
+    public static DatabaseReference getRefMensagens() {
+
+        if (refMensagens == null) {
+
+            refMensagens = getRefRoot().child(Const.PASTA_MENSAGENS);
+
+        }
+        return refMensagens;
+    }
+
+
+
+
+
 
     public static StorageReference getStorageRefRoot() {
 

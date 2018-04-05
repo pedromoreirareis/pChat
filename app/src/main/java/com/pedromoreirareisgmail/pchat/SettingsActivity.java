@@ -237,7 +237,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     protected void onStop() {
         super.onStop();
 
-        usuario = null;
         FireUtils.ultimaVez(mRefUsuario);
     }
 }

@@ -18,22 +18,19 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pedromoreirareisgmail.pchat.ChatActivity;
+import com.pedromoreirareisgmail.pchat.Fire.Fire;
 import com.pedromoreirareisgmail.pchat.Models.Amigo;
+import com.pedromoreirareisgmail.pchat.Models.Usuario;
 import com.pedromoreirareisgmail.pchat.ProfileActivity;
 import com.pedromoreirareisgmail.pchat.R;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
+import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.FragmentFriendsBinding;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.util.Locale;
@@ -46,15 +43,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class FriendsFragment extends Fragment {
 
     private FragmentFriendsBinding mBinding;
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUsuario;
+    //private FirebaseAuth mAuth;
+    // private FirebaseUser mUsuario;
     private DatabaseReference mRefRoot;
     private DatabaseReference mRefAmigos;
     private DatabaseReference mRefUsuarios;
     private FirebaseRecyclerAdapter mAdapterAmigos;
     private RecyclerView mReciclerView;
-    private String mIdUsuario;
+    // private String mIdUsuario;
     private Context mContext;
+    private Usuario usuario;
 
     public FriendsFragment() {
     }
@@ -74,6 +72,8 @@ public class FriendsFragment extends Fragment {
 
         mContext = getContext();
 
+        usuario = new Usuario();
+
         mReciclerView = mBinding.rvFriendsList;
         mReciclerView.setHasFixedSize(true);
         mReciclerView.setLayoutManager(new LinearLayoutManager(mContext));
@@ -81,16 +81,10 @@ public class FriendsFragment extends Fragment {
 
     private void initFirebase() {
 
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
-        mIdUsuario = mUsuario.getUid();
-
-        mRefRoot = FirebaseDatabase.getInstance().getReference();
-
-        mRefAmigos = mRefRoot.child(Const.PASTA_AMIGOS).child(mIdUsuario);
+        mRefAmigos = Fire.getRefAmigos().child(Fire.getIdUsuario());
         mRefAmigos.keepSynced(true);
 
-        mRefUsuarios = mRefRoot.child(Const.PASTA_USUARIOS);
+        mRefUsuarios = Fire.getRefUsuarios();
         mRefUsuarios.keepSynced(true);
     }
 
@@ -116,8 +110,8 @@ public class FriendsFragment extends Fragment {
 
                 final String idAmigo = getRef(position).getKey();
 
-                final long data = model.getData();
-                holder.setTvData(data, mContext);
+                final long dataHora = model.getData();
+                holder.setDataHora(dataHora, mContext);
 
                 mRefUsuarios.child(idAmigo).addValueEventListener(new ValueEventListener() {
                     @Override
@@ -125,19 +119,16 @@ public class FriendsFragment extends Fragment {
 
                         if (dataSnapshot != null) {
 
-                            final String nome = dataSnapshot.child(Const.DB_NOME).getValue().toString();
-                            String status = dataSnapshot.child(Const.DB_STATUS).getValue().toString();
-                            String urlImagem = dataSnapshot.child(Const.DB_THUMB).getValue().toString();
+                            usuario = dataSnapshot.getValue(Usuario.class);
 
                             if (dataSnapshot.hasChild(Const.DB_ON_LINE)) {
 
-                                boolean online = (boolean) dataSnapshot.child(Const.DB_ON_LINE).getValue();
-                                holder.setTvOnline(online, mContext);
+                                holder.setOnline(usuario.getOnline(), mContext);
                             }
 
-                            holder.setTvNome(nome);
-                            holder.setTvStatus(status);
-                            holder.setCivImagem(urlImagem, mContext);
+                            holder.setNome(usuario.getNome());
+                            holder.setStatus(usuario.getStatus());
+                            holder.setImagem(usuario.getThumbnail());
 
                             holder.clContent.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -145,7 +136,7 @@ public class FriendsFragment extends Fragment {
 
                                     Intent chatIntent = new Intent(mContext, ChatActivity.class);
                                     chatIntent.putExtra(Const.INTENT_ID_AMIGO, idAmigo);
-                                    chatIntent.putExtra(Const.INTENT_NOME_AMIGO, nome);
+                                    chatIntent.putExtra(Const.INTENT_NOME_AMIGO, usuario.getNome());
                                     startActivity(chatIntent);
                                 }
                             });
@@ -191,7 +182,7 @@ public class FriendsFragment extends Fragment {
         mAdapterAmigos.stopListening();
     }
 
-    public static class FriendsViewHolder extends RecyclerView.ViewHolder {
+    public class FriendsViewHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView civImagem;
         private TextView tvNome;
@@ -213,39 +204,21 @@ public class FriendsFragment extends Fragment {
             ivMais = itemView.findViewById(R.id.ivbut_friend_mais);
         }
 
-        public void setCivImagem(final String urlImagem, final Context context) {
+        public void setImagem(final String urlImagem) {
 
             if (!urlImagem.equals(Const.DB_REG_THUMB)) {
 
-                Picasso.with(context)
-                        .load(urlImagem)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .placeholder(context.getResources().getDrawable(R.drawable.ic_usuario))
-                        .into(civImagem, new Callback() {
-                            @Override
-                            public void onSuccess() {
-
-                            }
-
-                            @Override
-                            public void onError() {
-
-                                Picasso.with(context)
-                                        .load(urlImagem)
-                                        .placeholder(context.getResources().getDrawable(R.drawable.ic_usuario))
-                                        .into(civImagem);
-                            }
-                        });
+                PicassoDownload.civChachePlaceholder(mContext, urlImagem, R.drawable.ic_usuario, civImagem);
             }
 
         }
 
-        public void setTvNome(String nome) {
+        public void setNome(String nome) {
 
             tvNome.setText(nome);
         }
 
-        public void setTvOnline(Boolean online, Context context) {
+        public void setOnline(Boolean online, Context context) {
 
             if (online) {
 
@@ -258,12 +231,12 @@ public class FriendsFragment extends Fragment {
 
         }
 
-        public void setTvStatus(String status) {
+        public void setStatus(String status) {
 
             tvStatus.setText(status);
         }
 
-        public void setTvData(long data, Context context) {
+        public void setDataHora(long data, Context context) {
 
             tvData.setText(String.format(context.getString(R.string.msg_amigos_desde),
                     DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(data)));

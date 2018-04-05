@@ -17,7 +17,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,10 +36,8 @@ import com.pedromoreirareisgmail.pchat.Models.Mensagem;
 import com.pedromoreirareisgmail.pchat.Utils.Comprimir;
 import com.pedromoreirareisgmail.pchat.Utils.Const;
 import com.pedromoreirareisgmail.pchat.Utils.GetDateTime;
+import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityChatBinding;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -59,10 +56,7 @@ public class ChatActivity extends AppCompatActivity implements
     private ActivityChatBinding mBinding;
     private DatabaseReference mRefRoot;
     private DatabaseReference mRefAmigo;
-    private DatabaseReference mRefChat;
     private DatabaseReference mRefMensagensAmigo;
-    private DatabaseReference mRefChatUsuario;
-    // private StorageReference mStorageImagens;
     private TextView mTvBarNome;
     private TextView mTvBarVisualizacao;
     private CircleImageView mCivImagem;
@@ -70,8 +64,6 @@ public class ChatActivity extends AppCompatActivity implements
     private LinearLayoutManager mLlManager;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefresh;
-    private ImageButton mIvButAdicionar;
-    private ImageButton mIvButEnviar;
     private List<Mensagem> mListMensagens;
     private AdapterMensagem mAdapter;
     private String mIdUsuario;
@@ -114,16 +106,11 @@ public class ChatActivity extends AppCompatActivity implements
         mRefRoot = Fire.getRefRoot();
         mRefRoot.keepSynced(true);
 
-        mRefAmigo = mRefRoot.child(Const.PASTA_USUARIOS).child(mIdAmigo);
+        mRefAmigo = Fire.getRefUsuarios().child(mIdAmigo);
         mRefAmigo.keepSynced(true);
 
-        mRefChat = mRefRoot.child(Const.PASTA_CHAT);
-        mRefChat.keepSynced(true);
 
-        mRefChatUsuario = mRefRoot.child(Const.PASTA_CHAT).child(mIdUsuario);
-        mRefChatUsuario.keepSynced(true);
-
-        mRefMensagensAmigo = mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo);
+        mRefMensagensAmigo = Fire.getRefMensagens().child(mIdUsuario).child(mIdAmigo);
         mRefMensagensAmigo.keepSynced(true);
     }
 
@@ -151,17 +138,15 @@ public class ChatActivity extends AppCompatActivity implements
 
         mSwipeRefresh = mBinding.srlChatRefresh;
 
-        mLlManager = new LinearLayoutManager(this);
+        mLlManager = new LinearLayoutManager(mContext);
         mRecyclerView = mBinding.rvChatList;
         mRecyclerView.setLayoutManager(mLlManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        mIvButAdicionar = mBinding.ivbutChatAdicionar;
-        mIvButEnviar = mBinding.ivbutChatEnviar;
         mEtMensagem = mBinding.etChatMensagem;
 
-        mIvButEnviar.setOnClickListener(this);
-        mIvButAdicionar.setOnClickListener(this);
+        mBinding.ivbutChatEnviarMensagem.setOnClickListener(this);
+        mBinding.ivbutChatEnviarArqvuivo.setOnClickListener(this);
 
         mSwipeRefresh.setOnRefreshListener(this);
     }
@@ -332,25 +317,7 @@ public class ChatActivity extends AppCompatActivity implements
 
                 if (!urlImagem.equals(Const.DB_REG_THUMB)) {
 
-                    Picasso.with(mContext)
-                            .load(urlImagem)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .placeholder(getDrawable(R.drawable.ic_usuario))
-                            .into(mCivImagem, new Callback() {
-                                @Override
-                                public void onSuccess() {
-
-                                }
-
-                                @Override
-                                public void onError() {
-
-                                    Picasso.with(mContext)
-                                            .load(urlImagem)
-                                            .placeholder(getDrawable(R.drawable.ic_usuario))
-                                            .into(mCivImagem);
-                                }
-                            });
+                    PicassoDownload.civChachePlaceholder(mContext, urlImagem, R.drawable.ic_usuario, mCivImagem);
                 }
             }
 
@@ -363,38 +330,22 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void verificarJaTemChatAmigo() {
 
-        mRefChatUsuario.addValueEventListener(new ValueEventListener() {
+        Fire.getRefChat().child(mIdUsuario).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (!dataSnapshot.hasChild(mIdAmigo)) {
 
-
-
-                    /*
-                    Map<String, Object> mapAddChat = new HashMap<>();
-                    mapAddChat.put(Const.CHAT_LIDA, false);
-                    mapAddChat.put(Const.CHAT_TIME, ServerValue.TIMESTAMP);
-
-                    Map<String, Object> mapUsuarioChat = new HashMap<>();
-
-                    mapUsuarioChat.put(Const.PASTA_CHAT + "/" + mIdUsuario + "/" + mIdAmigo, mapAddChat);
-                    mapUsuarioChat.put(Const.PASTA_CHAT + "/" + mIdAmigo + "/" + mIdUsuario, mapAddChat);
-
-*/
-                    mRefRoot.updateChildren(FireUtils.mapAddUsuariosChat(mIdUsuario,mIdAmigo), new DatabaseReference.CompletionListener() {
+                    mRefRoot.updateChildren(FireUtils.mapAddUsuariosChat(mIdUsuario, mIdAmigo), new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
                             if (databaseError == null) {
 
                             }
-
                         }
                     });
-
                 }
-
             }
 
             @Override
@@ -416,12 +367,12 @@ public class ChatActivity extends AppCompatActivity implements
 
         switch (view.getId()) {
 
-            case R.id.ivbut_chat_enviar:
+            case R.id.ivbut_chat_enviar_mensagem:
 
                 enviarMensagem();
                 break;
 
-            case R.id.ivbut_chat_adicionar:
+            case R.id.ivbut_chat_enviar_arqvuivo:
 
                 CropImage.activity().setGuidelines(CropImageView.Guidelines.ON)
                         .start(this);
@@ -521,7 +472,6 @@ public class ChatActivity extends AppCompatActivity implements
                     });
         }
     }
-
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
