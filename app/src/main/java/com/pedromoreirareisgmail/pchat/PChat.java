@@ -2,25 +2,20 @@ package com.pedromoreirareisgmail.pchat;
 
 import android.app.Application;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.utils.Const;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
 public class PChat extends Application {
 
     private DatabaseReference mRefUsuario;
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUsuario;
-    private String mIdUsuario;
-
 
     @Override
     public void onCreate() {
@@ -40,15 +35,10 @@ public class PChat extends Application {
         Picasso.setSingletonInstance(built);
 
 
-        mAuth = FirebaseAuth.getInstance();
-        mUsuario = mAuth.getCurrentUser();
+        if (Fire.getUsuario() != null) {
 
-        if (mUsuario != null) {
 
-            mIdUsuario = mUsuario.getUid();
-
-            mRefUsuario = FirebaseDatabase.getInstance().getReference()
-                    .child(Const.PASTA_USUARIOS).child(mAuth.getCurrentUser().getUid());
+            mRefUsuario =  Fire.getRefUsuario();
 
             mRefUsuario.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -56,15 +46,15 @@ public class PChat extends Application {
 
                     if (dataSnapshot != null) {
 
-                        if(dataSnapshot.hasChild(Const.DB_ON_LINE)) {
+                        if(dataSnapshot.hasChild(Const.USUARIO_ONLINE)) {
 
-                            boolean online = (boolean) dataSnapshot.child(Const.DB_ON_LINE).getValue();
+                            boolean online = (boolean) dataSnapshot.child(Const.USUARIO_ONLINE).getValue();
                             if (online) {
 
-                                mRefUsuario.child(Const.DB_ON_LINE).onDisconnect().setValue(false);
-                                mRefUsuario.child(Const.DB_ULT_VEZ).onDisconnect().setValue(ServerValue.TIMESTAMP);
+                                mRefUsuario.child(Const.USUARIO_ONLINE).onDisconnect().setValue(false);
+                                mRefUsuario.child(Const.USUARIO_ULT_ACESSO).onDisconnect().setValue(ServerValue.TIMESTAMP);
 
-                                mRefUsuario.child(Const.DB_ON_LINE).setValue(true);
+                                mRefUsuario.child(Const.USUARIO_ONLINE).setValue(true);
                             }
                         }
                     }

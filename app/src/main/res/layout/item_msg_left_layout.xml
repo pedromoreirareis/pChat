@@ -8,7 +8,6 @@
         android:layout_height="wrap_content">
 
         <android.support.v7.widget.CardView
-            android:elevation="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -16,28 +15,30 @@
             android:layout_marginEnd="64dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            app:cardElevation="8dp"
-            app:cardCornerRadius="16dp">
+            android:elevation="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
             <LinearLayout
-                android:background="@drawable/bg_msg_chat_primary"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:minWidth="108dp"
+                android:background="@drawable/bg_msg_chat_primary"
                 android:minHeight="48dp"
+                android:minWidth="108dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:paddingTop="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
                     android:id="@+id/tv_msg_chat_mensagem"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
                     android:textColor="@color/colorWhite"
                     android:textSize="14sp" />
 
                 <TextView
+
                     android:id="@+id/tv_msg_chat_data"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

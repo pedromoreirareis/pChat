@@ -20,20 +20,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.UploadTask;
-import com.pedromoreirareisgmail.pchat.Fire.Fire;
-import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
-import com.pedromoreirareisgmail.pchat.Models.Usuario;
-import com.pedromoreirareisgmail.pchat.Utils.Comprimir;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.Internet;
-import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.ActivitySettingsBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.fire.FireUtils;
+import com.pedromoreirareisgmail.pchat.models.Usuario;
+import com.pedromoreirareisgmail.pchat.utils.Comprimir;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.Internet;
+import com.pedromoreirareisgmail.pchat.utils.PicassoDownload;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -48,14 +49,12 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private Context mContext;
     private Usuario usuario;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
         initViews();
-
     }
 
     private void initViews() {
@@ -66,7 +65,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarSettings;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.titulo_settings));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.titulo_settings));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mCivImagem = mBinding.civSettingsImagem;
@@ -105,15 +104,14 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                usuario = dataSnapshot.getValue(Usuario.class);
+                usuario = Objects.requireNonNull(dataSnapshot.getValue(Usuario.class));
 
                 mTvNome.setText(usuario.getNome());
                 mTvStatus.setText(usuario.getStatus());
 
+                if (!usuario.getUrlImagem().equals(Const.IMG_PADRAO_IMAGEM)) {
 
-                if (!usuario.getImagem().equals(Const.DB_REG_IMAGEM)) {
-
-                    PicassoDownload.civChachePlaceholder(mContext, usuario.getImagem(), R.drawable.ic_usuario, mCivImagem);
+                    PicassoDownload.civChachePlaceholder(mContext, usuario.getUrlImagem(), R.drawable.ic_usuario, mCivImagem);
                 }
             }
 
@@ -146,8 +144,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             case R.id.but_settings_status:
 
                 Intent statusIntent = new Intent(mContext, StatusActivity.class);
-                statusIntent.putExtra(Const.INTENT_STATUS, usuario.getStatus());
-                statusIntent.putExtra(Const.INTENT_NOME, usuario.getNome());
+                statusIntent.putExtra(Const.INTENT_SETTINGS_STATUS,usuario);
                 startActivity(statusIntent);
                 break;
         }
@@ -170,6 +167,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
 
                 Exception error = result.getError();
+                error.printStackTrace();
             }
         }
     }
@@ -178,8 +176,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         File filePath = new File(resultUri.getPath());
 
-        final byte[] imagemPerfilByte = Comprimir.comprimirImagem(mContext, filePath, 220, 220, 40);
-        final byte[] imagemThumbByte = Comprimir.comprimirImagem(mContext, filePath, 84, 84, 10);
+        final byte[] imagemPerfilByte = Comprimir.comprimirImagem(mContext, filePath, 300, 300, 40);
+        final byte[] imagemThumbByte = Comprimir.comprimirImagem(mContext, filePath, 200, 200, 10);
 
         salvarImagem(imagemPerfilByte, imagemThumbByte);
     }
@@ -198,7 +196,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
                 if (task.isSuccessful()) {
 
-                    final String urlDownloadPerfil = task.getResult().getDownloadUrl().toString();
+                    final String urlDownloadPerfil = Objects.requireNonNull(task.getResult().getDownloadUrl()).toString();
 
                     UploadTask uploadTask = Fire.getStorageRefImgThumbnail().putBytes(imagemThumbByte);
 
@@ -208,11 +206,11 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
                             if (taskThumnail.isSuccessful()) {
 
-                                String urlDownloadThumb = taskThumnail.getResult().getDownloadUrl().toString();
+                                String urlDownloadThumb = Objects.requireNonNull(taskThumnail.getResult().getDownloadUrl()).toString();
 
                                 Map<String, Object> dadosUrlImagem = new HashMap<>();
-                                dadosUrlImagem.put(Const.DB_IMAGEM, urlDownloadPerfil);
-                                dadosUrlImagem.put(Const.DB_THUMB, urlDownloadThumb);
+                                dadosUrlImagem.put(Const.USUARIO_IMAGEM, urlDownloadPerfil);
+                                dadosUrlImagem.put(Const.USUARIO_URLTHUMBNAIL, urlDownloadThumb);
 
                                 mRefUsuario.updateChildren(dadosUrlImagem);
 
@@ -232,11 +230,10 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
 
-        FireUtils.ultimaVez(mRefUsuario);
+        FireUtils.ultimoAcesso(mRefUsuario);
     }
 }

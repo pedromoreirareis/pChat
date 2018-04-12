@@ -14,13 +14,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.pedromoreirareisgmail.pchat.Fire.Fire;
-import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
-import com.pedromoreirareisgmail.pchat.Models.Usuario;
-import com.pedromoreirareisgmail.pchat.Utils.Buts;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityProfileBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.fire.FireUtils;
+import com.pedromoreirareisgmail.pchat.models.Usuario;
+import com.pedromoreirareisgmail.pchat.utils.Buts;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.PicassoDownload;
+
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -51,6 +53,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         if (getIntent().hasExtra(Const.INTENT_ID_OUTRO_USUARIO)) {
 
             mIdConvite = getIntent().getStringExtra(Const.INTENT_ID_OUTRO_USUARIO);
+
+        } else if (getIntent().hasExtra("from_user_id")) {
+
+            mIdConvite = getIntent().getStringExtra("from_user_id");
         }
 
         mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
@@ -66,7 +72,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarProfile;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.titulo_profile));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.titulo_profile));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mCivImagem = mBinding.civProfileImagem;
@@ -133,14 +139,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                usuario = dataSnapshot.getValue(Usuario.class);
+                usuario = Objects.requireNonNull(dataSnapshot.getValue(Usuario.class));
 
                 mTvNome.setText(usuario.getNome());
                 mTvStatus.setText(usuario.getStatus());
 
-                if (!usuario.getImagem().equals(Const.DB_REG_IMAGEM)) {
+                if (!usuario.getUrlImagem().equals(Const.IMG_PADRAO_IMAGEM)) {
 
-                    PicassoDownload.civChachePlaceholder(mContext,usuario.getImagem(),R.drawable.ic_usuario,mCivImagem);
+                    PicassoDownload.civChachePlaceholder(mContext, usuario.getUrlImagem(), R.drawable.ic_usuario, mCivImagem);
                 }
 
                 verificarSolicitacoesPendentes();
@@ -163,7 +169,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
                             if (dataSnapshot.hasChild(mIdConvite)) {
 
-                                String tipo_solicitacao = dataSnapshot.child(mIdConvite).child(Const.SOL_TIPO).getValue().toString();
+                                String tipo_solicitacao = Objects.requireNonNull(dataSnapshot.child(mIdConvite).child(Const.SOL_TIPO).getValue()).toString();
 
                                 if (tipo_solicitacao.equals(Const.SOL_TIPO_RECEBIDA)) {
 
@@ -182,29 +188,27 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                                     mDialog.dismiss();
                                 }
 
-                            } else {
-
-
-                                mRefAmigos.child(mIdUsuario).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                        if (dataSnapshot.hasChild(mIdConvite)) {
-
-                                            // AMIGOS => BUT FICA: DESFAZER AMIZADE
-
-                                            mEstadoAtual = Const.ESTADO_AMIGOS;
-                                            Buts.amigos(mContext, mButEnviar);
-                                            mDialog.dismiss();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                    }
-                                });
                             }
                         }
+
+                        mRefAmigos.child(mIdUsuario).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                if (dataSnapshot.hasChild(mIdConvite)) {
+
+                                    // AMIGOS => BUT FICA: DESFAZER AMIZADE
+
+                                    mEstadoAtual = Const.ESTADO_AMIGOS;
+                                    Buts.amigos(mContext, mButEnviar);
+                                    mDialog.dismiss();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
 
                         if (!mIdUsuario.equals(mIdConvite)) {
 
@@ -270,7 +274,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_adicionar_amigos));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapAdicionar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapAdicionar(mIdUsuario, mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -293,7 +297,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_cancelar_solicitacao));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapCancelar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapCancelar(mIdUsuario, mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -317,7 +321,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_aceitar_solicitacao));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapAceitar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapAceitar(mIdUsuario, mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -340,7 +344,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_recusar_amizade));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapRecusar(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapRecusar(mIdUsuario, mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -364,7 +368,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         mDialog.setTitle(getString(R.string.dialog_solicitacoes_titulo_desfazer_amizade));
         mDialog.show();
 
-        mRefRoot.updateChildren(FireUtils.mapDesfazer(mIdUsuario,mIdConvite), new DatabaseReference.CompletionListener() {
+        mRefRoot.updateChildren(FireUtils.mapDesfazer(mIdUsuario, mIdConvite), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -397,7 +401,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     protected void onStop() {
         super.onStop();
 
-        FireUtils.ultimaVez(Fire.getRefUsuario());
+        FireUtils.ultimoAcesso(Fire.getRefUsuario());
     }
 
 }

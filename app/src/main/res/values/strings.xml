@@ -79,7 +79,7 @@
     <string name="msg_selecione_imagem">Selecione uma Imagem</string>
     <string name="msg_amigos_desde">Amigos desde %1$s</string>
     <string name="msg_foto">Mensagem com foto…</string>
-    <string name="msg_nenhuma_msg">Mensagens não encontradas…</string>
+    <string name="msg_nenhuma_msg">Ainda não há mensagens com este amigo…   Comece agora!!!</string>
     <string name="msg_tipo_solicitacao_enviada">Solicitação Enviada</string>
     <string name="msg_tipo_solicitacao_recebida">Solicitação Recebida</string>
 
@@ -104,6 +104,7 @@
     <string name="image_description_online">Imagem determina se usuário está online.</string>
     <string name="image_description_send">Imagem botão enviar mensagem.</string>
     <string name="image_description_add">Imagem botão adicionar.</string>
+    <string name="image_description_camera">Imagem de uma câmera.</string>
 
     // BOTÕES
     <string name="but_settings_imagem">Alterar Imagem</string>

@@ -1,6 +1,7 @@
 package com.pedromoreirareisgmail.pchat;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -16,27 +17,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.Internet;
-import com.pedromoreirareisgmail.pchat.Utils.Validacoes;
+import com.google.firebase.database.ServerValue;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityRegisterBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.Internet;
+import com.pedromoreirareisgmail.pchat.utils.Validacoes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ActivityRegisterBinding mBinding;
     private FirebaseAuth mAuth;
-    private DatabaseReference mRefUsuario;
     private EditText mEtNome;
     private EditText mEtEmail;
     private EditText mEtSenha;
     private ProgressDialog mDialog;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +49,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void initViews() {
 
+        mContext = RegisterActivity.this;
+
         Toolbar toolbar = (Toolbar) mBinding.toolbarRegister;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.titulo_register));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.titulo_register));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEtNome = mBinding.etRegisterNome;
@@ -59,7 +61,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         mEtSenha = mBinding.etRegisterSenha;
         mBinding.butRegisterCriarConta.setOnClickListener(this);
 
-        mDialog = new ProgressDialog(this);
+        mDialog = new ProgressDialog(mContext);
     }
 
     private void initFirebase() {
@@ -85,9 +87,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String email = mEtEmail.getText().toString().trim();
         String senha = mEtSenha.getText().toString().trim();
 
-        if (Validacoes.nomeEmailSenha(this, mEtNome, nome, mEtEmail, email, mEtSenha, senha)) {
+        if (Validacoes.nomeEmailSenha(mContext, mEtNome, nome, mEtEmail, email, mEtSenha, senha)) {
 
-            if (Internet.temInternet(this)) {
+            if (Internet.temInternet(mContext)) {
 
                 registrarNovaContaUsuario(nome, email, senha);
             }
@@ -109,26 +111,21 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
                         if (task.isSuccessful()) {
 
-                            final FirebaseUser usuario = mAuth.getCurrentUser();
-                            if (usuario != null) {
+                            if (Fire.getUsuario() != null) {
 
                                 mDialog.setTitle(getString(R.string.dialogo_criar_conta_titulo_dados));
                                 mDialog.setMessage(getString(R.string.dialogo_criar_conta_msg_dados));
 
-                                String idUsuario = usuario.getUid();
-                                String deviceToken = FirebaseInstanceId.getInstance().getToken();
-                                mRefUsuario = FirebaseDatabase.getInstance().getReference(Const.PASTA_USUARIOS).child(idUsuario);
-
                                 Map<String, Object> usuarioMap = new HashMap<>();
-                                usuarioMap.put(Const.DB_NOME, nome);
-                                usuarioMap.put(Const.DB_STATUS, Const.DB_REG_STATUS);
-                                usuarioMap.put(Const.DB_IMAGEM, Const.DB_REG_IMAGEM);
-                                usuarioMap.put(Const.DB_THUMB, Const.DB_REG_THUMB);
-                                usuarioMap.put(Const.DB_D_TOKEN, deviceToken);
-                                usuarioMap.put(Const.DB_ON_LINE, true);
+                                usuarioMap.put(Const.USUARIO_NOME, nome);
+                                usuarioMap.put(Const.USUARIO_STATUS, Const.STATUS_PADRAO);
+                                usuarioMap.put(Const.USUARIO_IMAGEM, Const.IMG_PADRAO_IMAGEM);
+                                usuarioMap.put(Const.USUARIO_URLTHUMBNAIL, Const.IMG_PADRAO_THUMBNAIL);
+                                usuarioMap.put(Const.USUARIO_DEVICETOKEN, Fire.getDeviceToken());
+                                usuarioMap.put(Const.USUARIO_ONLINE, true);
+                                usuarioMap.put(Const.USUARIO_ULT_ACESSO, ServerValue.TIMESTAMP);
 
-
-                                mRefUsuario.setValue(usuarioMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                Fire.getRefUsuario().setValue(usuarioMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
@@ -141,7 +138,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                         } else {
 
                                             mDialog.dismiss();
-                                            Toast.makeText(RegisterActivity.this, getString(R.string.toast_register_erro_criar_conta), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(mContext, getString(R.string.toast_register_erro_criar_conta), Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });
@@ -158,7 +155,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                     throw task.getException();
                                 }
 
-
                             } catch (FirebaseAuthWeakPasswordException e) {
 
                                 erroRegistrar = getString(R.string.toast_register_erro_criar_conta_senha);
@@ -168,9 +164,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                 erroRegistrar = getString(R.string.toast_register_erro_criar_conta_msg);
                             }
 
-
                             mDialog.dismiss();
-                            Toast.makeText(RegisterActivity.this, String.format(getString(R.string.toast_register_erro_criar_conta), erroRegistrar), Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, String.format(getString(R.string.toast_register_erro_criar_conta), erroRegistrar), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -179,7 +174,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void abrirActivityMain() {
 
-        Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+        Intent mainIntent = new Intent(mContext, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
     }

@@ -12,15 +12,17 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.pedromoreirareisgmail.pchat.Fire.Fire;
-import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.Internet;
-import com.pedromoreirareisgmail.pchat.Utils.Validacoes;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityStatusBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.fire.FireUtils;
+import com.pedromoreirareisgmail.pchat.models.Usuario;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.Internet;
+import com.pedromoreirareisgmail.pchat.utils.Validacoes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class StatusActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,7 +46,7 @@ public class StatusActivity extends AppCompatActivity implements View.OnClickLis
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarStatus;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.titulo_status));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.titulo_status));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEtNome = mBinding.etStatusNome;
@@ -52,14 +54,11 @@ public class StatusActivity extends AppCompatActivity implements View.OnClickLis
 
         mBinding.butStatusSalvar.setOnClickListener(this);
 
-        if (getIntent().hasExtra(Const.INTENT_NOME)) {
+        if (getIntent() != null) {
 
-            mEtNome.setText(getIntent().getStringExtra(Const.INTENT_NOME));
-        }
-
-        if (getIntent().hasExtra(Const.INTENT_STATUS)) {
-
-            mEtStatus.setText(getIntent().getStringExtra(Const.INTENT_STATUS));
+            Usuario usuario = getIntent().getParcelableExtra(Const.INTENT_SETTINGS_STATUS);
+            mEtNome.setText(usuario.getNome());
+            mEtStatus.setText(usuario.getStatus());
         }
 
         mDialog = new ProgressDialog(mContext);
@@ -74,7 +73,6 @@ public class StatusActivity extends AppCompatActivity implements View.OnClickLis
             FireUtils.usuarioOnLine(Fire.getRefUsuario());
         }
     }
-
 
     @Override
     public void onClick(View view) {
@@ -104,9 +102,8 @@ public class StatusActivity extends AppCompatActivity implements View.OnClickLis
                 mDialog.show();
 
                 Map<String, Object> mapUsuario = new HashMap<>();
-
-                mapUsuario.put(Const.DB_NOME, nome);
-                mapUsuario.put(Const.DB_STATUS, status);
+                mapUsuario.put(Const.USUARIO_NOME, nome);
+                mapUsuario.put(Const.USUARIO_STATUS, status);
 
                 Fire.getRefUsuario().updateChildren(mapUsuario, new DatabaseReference.CompletionListener() {
                     @Override
@@ -133,6 +130,6 @@ public class StatusActivity extends AppCompatActivity implements View.OnClickLis
     protected void onStop() {
         super.onStop();
 
-        FireUtils.ultimaVez(Fire.getRefUsuario());
+        FireUtils.ultimoAcesso(Fire.getRefUsuario());
     }
 }

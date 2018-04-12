@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,12 +12,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.pedromoreirareisgmail.pchat.Adapters.AdapterPaginas;
-import com.pedromoreirareisgmail.pchat.Fire.Fire;
-import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.pedromoreirareisgmail.pchat.adapters.AdapterPaginas;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityMainBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.fire.FireUtils;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Objects;
+
+public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private ActivityMainBinding mBinding;
     private Context mContext;
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) mBinding.toolbarMain;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.app_name));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.app_name));
 
         TabLayout tab = mBinding.tabsMain;
         ViewPager pagina = mBinding.paginasMain;
@@ -60,7 +64,11 @@ public class MainActivity extends AppCompatActivity {
             irParaActivityStart();
         } else {
 
+            Fire.getAuth().addAuthStateListener(this);
+
             FireUtils.usuarioOnLine(Fire.getRefUsuario());
+
+            FireUtils.usuarioDeviceAcesso(Fire.getRefUsuario());
         }
     }
 
@@ -103,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
                     irParaActivityStart();
                 }
 
-
                 return true;
 
             case R.id.action_menu_usuarios:
@@ -123,7 +130,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (Fire.getUsuario() != null) {
 
-            FireUtils.ultimaVez(Fire.getRefUsuario());
+            FireUtils.ultimoAcesso(Fire.getRefUsuario());
+            Fire.getAuth().removeAuthStateListener(this);
+        }
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
+        if(firebaseAuth.getCurrentUser() == null){
+
+            irParaActivityStart();
         }
     }
 }

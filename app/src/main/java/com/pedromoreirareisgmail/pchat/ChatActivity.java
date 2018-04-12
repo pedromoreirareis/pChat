@@ -13,9 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -29,28 +27,29 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.pedromoreirareisgmail.pchat.Adapters.AdapterMensagem;
-import com.pedromoreirareisgmail.pchat.Fire.Fire;
-import com.pedromoreirareisgmail.pchat.Fire.FireUtils;
-import com.pedromoreirareisgmail.pchat.Models.Mensagem;
-import com.pedromoreirareisgmail.pchat.Utils.Comprimir;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.GetDateTime;
-import com.pedromoreirareisgmail.pchat.Utils.PicassoDownload;
+import com.pedromoreirareisgmail.pchat.adapters.AdapterMensagem;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityChatBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.fire.FireUtils;
+import com.pedromoreirareisgmail.pchat.models.Mensagem;
+import com.pedromoreirareisgmail.pchat.models.Usuario;
+import com.pedromoreirareisgmail.pchat.utils.Comprimir;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.GetDateTime;
+import com.pedromoreirareisgmail.pchat.utils.PicassoDownload;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity implements
         View.OnClickListener,
-        SwipeRefreshLayout.OnRefreshListener,
-        EditText.OnEditorActionListener {
+        SwipeRefreshLayout.OnRefreshListener {
 
     private static final int TOTAL_MENSAGENS_DOWNLOAD = 100;
     private ActivityChatBinding mBinding;
@@ -70,9 +69,6 @@ public class ChatActivity extends AppCompatActivity implements
     private String mIdAmigo;
     private String mNomeAmigo;
     private int mPaginaAtual = 1;
-    private int mItemPos = 0;
-    private String mUtilmaChave = "";
-    private String mPenultimaChave = "";
     private Context mContext;
     private boolean isRefresh;
 
@@ -82,17 +78,33 @@ public class ChatActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_chat);
 
-        if (getIntent().hasExtra(Const.INTENT_ID_AMIGO)) {
-
-            mIdAmigo = getIntent().getStringExtra(Const.INTENT_ID_AMIGO);
-        }
-
-        if (getIntent().hasExtra(Const.INTENT_NOME_AMIGO)) {
-
-            mNomeAmigo = getIntent().getStringExtra(Const.INTENT_NOME_AMIGO);
-        }
-
         mContext = ChatActivity.this;
+
+        if (getIntent().hasExtra(Const.INTENT_ID_OUTRO_USUARIO)) {
+
+            // Vem do frag Conversas ou Frag Amigos
+            mIdAmigo = getIntent().getStringExtra(Const.INTENT_ID_OUTRO_USUARIO);
+
+        } else if (getIntent().hasExtra("from_user_id")) {
+
+            // Vem da notificação
+            mIdAmigo = getIntent().getStringExtra("from_user_id");
+        }
+
+
+        if (getIntent().hasExtra(Const.INTENT_NOME_OUTRO_USUARIO)) {
+
+            mNomeAmigo = getIntent().getStringExtra(Const.INTENT_NOME_OUTRO_USUARIO);
+
+        } else if (getIntent().hasExtra("from_userName")) {
+
+            mNomeAmigo = getIntent().getStringExtra("from_userName");
+        }
+
+        if (mIdAmigo == null) {
+
+            finish();
+        }
 
         initFirebase();
 
@@ -109,20 +121,18 @@ public class ChatActivity extends AppCompatActivity implements
         mRefAmigo = Fire.getRefUsuarios().child(mIdAmigo);
         mRefAmigo.keepSynced(true);
 
-
         mRefMensagensAmigo = Fire.getRefMensagens().child(mIdUsuario).child(mIdAmigo);
         mRefMensagensAmigo.keepSynced(true);
     }
 
     private void initViews() {
 
-
         Toolbar toolbar = (Toolbar) mBinding.toolbarChat;
         setSupportActionBar(toolbar);
 
         View actionBarView = getLayoutInflater().inflate(R.layout.chat_custom_bar, null);
 
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -160,9 +170,9 @@ public class ChatActivity extends AppCompatActivity implements
             FireUtils.usuarioOnLine(Fire.getRefUsuario());
         }
 
-        recuperarDadosAmigo();
-
         verificarJaTemChatAmigo();
+
+        recuperarDadosAmigo();
 
         carregarMensagens();
     }
@@ -171,67 +181,10 @@ public class ChatActivity extends AppCompatActivity implements
     public void onRefresh() {
 
         isRefresh = true;
-
-        mItemPos = 0;
-        //carregarMaisMensagens();
         mListMensagens.clear();
         carregarMensagens();
     }
 
-  /*  private void carregarMaisMensagens() {
-
-        Query queryMaisMensagens = mRefMensagensAmigo.orderByKey().endAt(mUtilmaChave).limitToLast(TOTAL_MENSAGENS_DOWNLOAD);
-        queryMaisMensagens.keepSynced(true);
-
-        queryMaisMensagens.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                Mensagem mensagem = dataSnapshot.getValue(Mensagem.class);
-                String mensagemKey = dataSnapshot.getKey();
-
-                if (!mPenultimaChave.equals(mensagemKey)) {
-
-                    mListMensagens.add(mItemPos++, mensagem);
-                } else {
-
-                    mPenultimaChave = mensagemKey;
-                }
-
-                if (mItemPos == 1) {
-
-                    mUtilmaChave = mensagemKey;
-                }
-
-                mAdapter.notifyDataSetChanged();
-
-                mSwipeRefresh.setRefreshing(false);
-
-                mLlManager.scrollToPositionWithOffset(10, 0);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }*/
 
     private void carregarMensagens() {
 
@@ -242,17 +195,7 @@ public class ChatActivity extends AppCompatActivity implements
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                Mensagem mensagem = dataSnapshot.getValue(Mensagem.class);
-
-               /* mItemPos++;
-
-                if (mItemPos == 1) {
-                    String mensagemKey = dataSnapshot.getKey();
-
-                    mUtilmaChave = mensagemKey;
-                    mPenultimaChave = mensagemKey;
-                }
-                */
+                Mensagem mensagem = Objects.requireNonNull(dataSnapshot.getValue(Mensagem.class));
 
                 mListMensagens.add(mensagem);
                 mAdapter.notifyDataSetChanged();
@@ -265,6 +208,15 @@ public class ChatActivity extends AppCompatActivity implements
                     isRefresh = false;
                 }
                 mPaginaAtual++;
+
+                if (mensagem.getIdOrigem().equals(mIdAmigo)) {
+
+                    String pushId = dataSnapshot.getKey();
+
+                    mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdUsuario).child(mIdAmigo).child(pushId).child(Const.MSG_LIDA).setValue(true);
+                    mRefRoot.child(Const.PASTA_MENSAGENS).child(mIdAmigo).child(mIdUsuario).child(pushId).child(Const.MSG_LIDA).setValue(true);
+                }
+
             }
 
             @Override
@@ -298,24 +250,20 @@ public class ChatActivity extends AppCompatActivity implements
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                boolean onLine = (boolean) dataSnapshot.child(Const.DB_ON_LINE).getValue();
+                Usuario usuario = Objects.requireNonNull(dataSnapshot.getValue(Usuario.class));
 
-                if (onLine) {
+                if (usuario.isOnline()) {
 
                     mTvBarVisualizacao.setText(getString(R.string.online));
 
                 } else {
 
-                    if (dataSnapshot.hasChild(Const.DB_ULT_VEZ)) {
-
-                        long ultimaVez = (long) dataSnapshot.child(Const.DB_ULT_VEZ).getValue();
-                        mTvBarVisualizacao.setText(GetDateTime.getTimeAgo(ultimaVez, mContext));
-                    }
+                    mTvBarVisualizacao.setText(GetDateTime.getTimeAgo(usuario.getUltAcesso(), mContext));
                 }
 
-                final String urlImagem = dataSnapshot.child(Const.DB_THUMB).getValue().toString();
+                String urlImagem = usuario.getUrlThumbnail();
 
-                if (!urlImagem.equals(Const.DB_REG_THUMB)) {
+                if (!urlImagem.equals(Const.IMG_PADRAO_THUMBNAIL)) {
 
                     PicassoDownload.civChachePlaceholder(mContext, urlImagem, R.drawable.ic_usuario, mCivImagem);
                 }
@@ -340,9 +288,6 @@ public class ChatActivity extends AppCompatActivity implements
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                            if (databaseError == null) {
-
-                            }
                         }
                     });
                 }
@@ -359,7 +304,7 @@ public class ChatActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
 
-        FireUtils.ultimaVez(Fire.getRefUsuario());
+        FireUtils.ultimoAcesso(Fire.getRefUsuario());
     }
 
     @Override
@@ -393,17 +338,18 @@ public class ChatActivity extends AppCompatActivity implements
 
                 Uri resultUri = result.getUri();
 
-                salvarImagem(resultUri);
+                enviarImagem(resultUri);
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
 
                 Exception error = result.getError();
+                error.printStackTrace();
             }
         }
 
     }
 
-    private void salvarImagem(Uri resultUri) {
+    private void enviarImagem(Uri resultUri) {
 
         File filePath = new File(resultUri.getPath());
 
@@ -421,7 +367,7 @@ public class ChatActivity extends AppCompatActivity implements
 
                 if (task.isSuccessful()) {
 
-                    final String urlImage = task.getResult().getDownloadUrl().toString();
+                    final String urlImage = Objects.requireNonNull(task.getResult().getDownloadUrl()).toString();
 
                     UploadTask uploadTask = storageImagemThumb.putBytes(imagemThumb);
 
@@ -431,16 +377,13 @@ public class ChatActivity extends AppCompatActivity implements
 
                             if (taskThumb.isSuccessful()) {
 
-                                String urlThumb = taskThumb.getResult().getDownloadUrl().toString();
+                                String urlThumb = Objects.requireNonNull(taskThumb.getResult().getDownloadUrl()).toString();
 
                                 mRefRoot.updateChildren(FireUtils.mapEnviarMsgImagem(mIdUsuario, mIdAmigo, urlImage, urlThumb),
                                         new DatabaseReference.CompletionListener() {
                                             @Override
                                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                                if (databaseError != null) {
-
-                                                }
                                             }
                                         });
                             }
@@ -454,6 +397,8 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void enviarMensagem() {
 
+        //TODO: Ao enviar uma mensagem ou notificação antes de apresentação notificação ver se usuario ja leu mensagem
+
         String mensagem = mEtMensagem.getText().toString().trim();
 
         if (!TextUtils.isEmpty(mensagem)) {
@@ -465,26 +410,9 @@ public class ChatActivity extends AppCompatActivity implements
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                            if (databaseError == null) {
-
-                            }
                         }
                     });
         }
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
-        if (v.getId() == R.id.et_chat_mensagem) {
-
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-
-                enviarMensagem();
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

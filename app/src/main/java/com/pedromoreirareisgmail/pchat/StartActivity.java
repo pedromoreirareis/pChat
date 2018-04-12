@@ -1,6 +1,7 @@
 package com.pedromoreirareisgmail.pchat;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -17,24 +18,25 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.pedromoreirareisgmail.pchat.Utils.Const;
-import com.pedromoreirareisgmail.pchat.Utils.Internet;
-import com.pedromoreirareisgmail.pchat.Utils.Validacoes;
+import com.google.firebase.database.ServerValue;
 import com.pedromoreirareisgmail.pchat.databinding.ActivityStartBinding;
+import com.pedromoreirareisgmail.pchat.fire.Fire;
+import com.pedromoreirareisgmail.pchat.utils.Const;
+import com.pedromoreirareisgmail.pchat.utils.Internet;
+import com.pedromoreirareisgmail.pchat.utils.Validacoes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class StartActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ActivityStartBinding mBinding;
     private FirebaseAuth mAuth;
-    private DatabaseReference mRefUsuarios;
     private EditText mEtEmail;
     private EditText mEtSenha;
     private ProgressDialog mDialog;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +49,11 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
 
     private void initViews() {
 
+        mContext = StartActivity.this;
+
         Toolbar toolbar = (Toolbar) mBinding.toolbarStart;
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.app_name));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.app_name));
 
         mEtEmail = mBinding.etStartEmail;
         mEtSenha = mBinding.etStartSenha;
@@ -62,7 +66,6 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     private void initFirebase() {
 
         mAuth = FirebaseAuth.getInstance();
-        mRefUsuarios = FirebaseDatabase.getInstance().getReference().child(Const.PASTA_USUARIOS);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
 
             case R.id.tv_start_criar_conta:
 
-                Intent registerIntent = new Intent(StartActivity.this, RegisterActivity.class);
+                Intent registerIntent = new Intent(mContext, RegisterActivity.class);
                 startActivity(registerIntent);
                 break;
 
@@ -88,9 +91,9 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         String email = mEtEmail.getText().toString().trim();
         String senha = mEtSenha.getText().toString().trim();
 
-        if (Validacoes.emailSenha(this, mEtEmail, email, mEtSenha, senha)) {
+        if (Validacoes.emailSenha(mContext, mEtEmail, email, mEtSenha, senha)) {
 
-            if (Internet.temInternet(this)) {
+            if (Internet.temInternet(mContext)) {
 
                 entrarContaUsuario(email, senha);
             }
@@ -112,15 +115,12 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
 
                         if (task.isSuccessful()) {
 
-                            String idUsuario = mAuth.getCurrentUser().getUid();
-                            String deviceToken = FirebaseInstanceId.getInstance().getToken();
-
                             Map<String, Object> usuarioMap = new HashMap<>();
-                            usuarioMap.put(Const.DB_D_TOKEN, deviceToken);
-                            usuarioMap.put(Const.DB_ON_LINE, true);
+                            usuarioMap.put(Const.USUARIO_DEVICETOKEN, Fire.getDeviceToken());
+                            usuarioMap.put(Const.USUARIO_ONLINE, true);
+                            usuarioMap.put(Const.USUARIO_ULT_ACESSO, ServerValue.TIMESTAMP);
 
-                            DatabaseReference refUsuario = FirebaseDatabase.getInstance().getReference().child(Const.PASTA_USUARIOS).child(idUsuario);
-                            refUsuario.updateChildren(usuarioMap, new DatabaseReference.CompletionListener() {
+                            Fire.getRefUsuario().updateChildren(usuarioMap, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
@@ -132,7 +132,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
                                     } else {
 
                                         mDialog.dismiss();
-                                        Toast.makeText(StartActivity.this, getString(R.string.toast_start_erro_entrar), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(mContext, getString(R.string.toast_start_erro_entrar), Toast.LENGTH_LONG).show();
 
                                     }
                                 }
@@ -141,7 +141,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
                         } else {
 
                             mDialog.dismiss();
-                            Toast.makeText(StartActivity.this, getString(R.string.toast_start_erro_entrar), Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, getString(R.string.toast_start_erro_entrar), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -149,7 +149,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
 
     private void abrirActivityMain() {
 
-        Intent mainIntent = new Intent(StartActivity.this, MainActivity.class);
+        Intent mainIntent = new Intent(mContext, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
     }

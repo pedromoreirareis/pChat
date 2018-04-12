@@ -14,11 +14,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".Service.FirebaseMessagingService">
+        <service android:name=".service.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <service android:name=".service.MyFirebaseInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+
 
         <activity
             android:name=".MainActivity"
@@ -64,7 +71,7 @@
             android:parentActivityName=".UsersActivity"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="com.pedromoreirareisgmail.pchat_TARGET_NOTIFICATION" />
+                <action android:name="com.pedromoreirareisgmail.pchat_TARGET_NOTIFICATION_SOL_AMIZADE" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -89,7 +96,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
+
+            <intent-filter>
+                <action android:name="com.pedromoreirareisgmail.pchat_TARGET_NOTIFICATION_MENSAGENS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+
+
     </application>
 
 </manifest>
