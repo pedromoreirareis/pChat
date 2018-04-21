@@ -27,6 +27,8 @@ import com.pedromoreirareisgmail.pchat.utils.Const;
 import com.pedromoreirareisgmail.pchat.utils.GetDateTime;
 import com.pedromoreirareisgmail.pchat.utils.PicassoDownload;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -37,6 +39,7 @@ public class AdapterFragChat extends FirebaseRecyclerAdapter<Chat, AdapterFragCh
     private Usuario usuario;
     private DatabaseReference mRefMensagens;
     private DatabaseReference mRefUsuarios;
+    private List<Usuario> listUsuario;
 
     public AdapterFragChat(@NonNull FirebaseRecyclerOptions<Chat> options, Context context, DatabaseReference refMensagens, DatabaseReference refUsuarios) {
         super(options);
@@ -44,11 +47,12 @@ public class AdapterFragChat extends FirebaseRecyclerAdapter<Chat, AdapterFragCh
         mRefMensagens = refMensagens;
         mRefUsuarios = refUsuarios;
         usuario = new Usuario();
+        listUsuario = new ArrayList<>();
     }
 
 
     @Override
-    protected void onBindViewHolder(@NonNull final ChatViewHolder holder, int position, @NonNull Chat chat) {
+    protected void onBindViewHolder(@NonNull final ChatViewHolder holder,int position, @NonNull Chat chat) {
 
         final String idAmigo = getRef(position).getKey();
 
@@ -114,20 +118,13 @@ public class AdapterFragChat extends FirebaseRecyclerAdapter<Chat, AdapterFragCh
 
                     usuario = Objects.requireNonNull(dataSnapshot.getValue(Usuario.class));
 
+                    listUsuario.add(usuario);
+
                     holder.setNome(usuario.getNome());
                     holder.setImagem(usuario.getUrlThumbnail());
                     holder.setOnline(usuario.isOnline(), usuario.getUltAcesso(), mContext);
 
-                    holder.itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
 
-                            Intent chatIntent = new Intent(mContext, ChatActivity.class);
-                            chatIntent.putExtra(Const.INTENT_ID_OUTRO_USUARIO, idAmigo);
-                            chatIntent.putExtra(Const.INTENT_NOME_OUTRO_USUARIO, usuario.getNome());
-                            mContext.startActivity(chatIntent);
-                        }
-                    });
                 }
             }
 
@@ -135,8 +132,22 @@ public class AdapterFragChat extends FirebaseRecyclerAdapter<Chat, AdapterFragCh
             public void onCancelled(DatabaseError databaseError) {
 
             }
+
+
+
         });
 
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent chatIntent = new Intent(mContext, ChatActivity.class);
+                chatIntent.putExtra(Const.INTENT_ID_OUTRO_USUARIO, idAmigo);
+                chatIntent.putExtra(Const.INTENT_NOME_OUTRO_USUARIO, holder.tvNome.getText().toString());
+                mContext.startActivity(chatIntent);
+            }
+        });
     }
 
     @NonNull

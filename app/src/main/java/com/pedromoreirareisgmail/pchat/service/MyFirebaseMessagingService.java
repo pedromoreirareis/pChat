@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.pedromoreirareisgmail.pchat.R;
@@ -20,13 +21,6 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-     /*  Se ativar aqui deve ativar o notification no index
-
-        RemoteMessage.Notification notification = Objects.requireNonNull(remoteMessage.getNotification());
-
-        String titulo = notification.getTitle();
-        String mensagem = notification.getBody();
-        String click_action = notification.getClickAction();  */
 
         String titulo = remoteMessage.getData().get("title");
         String mensagem = remoteMessage.getData().get("body");
@@ -34,15 +28,20 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
         String from_userName = remoteMessage.getData().get("from_userName");
         String from_user_id = remoteMessage.getData().get("from_user_id");
 
+
+        if(TextUtils.isEmpty(mensagem)){
+
+            mensagem = "A mensagem é uma foto ou imagem...";
+        }
+
         Uri notifSom = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(titulo)
-                        .setContentText(mensagem)
-                        .setSound(notifSom)
-                        .setAutoCancel(true);
+        NotificationCompat.Builder mBuilder =new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_chat_notificacao)
+                .setContentTitle(titulo)
+                .setContentText(mensagem)
+                .setSound(notifSom)
+                .setAutoCancel(true);
 
         Intent resultIntent = new Intent(click_action);
         resultIntent.putExtra(Const.INTENT_ID_OUTRO_USUARIO, from_user_id);

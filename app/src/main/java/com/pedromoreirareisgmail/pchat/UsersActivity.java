@@ -90,4 +90,5 @@ public class UsersActivity extends AppCompatActivity {
         FireUtils.ultimoAcesso(Fire.getRefUsuario());
         mAdapter.stopListening();
     }
+
 }

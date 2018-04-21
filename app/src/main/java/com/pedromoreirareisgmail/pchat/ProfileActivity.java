@@ -54,11 +54,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
             mIdConvite = getIntent().getStringExtra(Const.INTENT_ID_OUTRO_USUARIO);
 
-        } else if (getIntent().hasExtra("from_user_id")) {
+        }
+        /*
+        else if (getIntent().hasExtra("from_user_id")) {
 
             mIdConvite = getIntent().getStringExtra("from_user_id");
         }
-
+*/
         mEstadoAtual = Const.ESTADO_NAO_AMIGOS;
 
         initViews();

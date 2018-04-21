@@ -78,7 +78,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
-                    android:inputType="time"
                     android:maxLines="1"
                     android:textColor="#ccc"
                     android:textSize="12sp"

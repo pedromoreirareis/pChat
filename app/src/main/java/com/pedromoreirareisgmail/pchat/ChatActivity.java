@@ -82,23 +82,12 @@ public class ChatActivity extends AppCompatActivity implements
 
         if (getIntent().hasExtra(Const.INTENT_ID_OUTRO_USUARIO)) {
 
-            // Vem do frag Conversas ou Frag Amigos
             mIdAmigo = getIntent().getStringExtra(Const.INTENT_ID_OUTRO_USUARIO);
-
-        } else if (getIntent().hasExtra("from_user_id")) {
-
-            // Vem da notificação
-            mIdAmigo = getIntent().getStringExtra("from_user_id");
         }
-
 
         if (getIntent().hasExtra(Const.INTENT_NOME_OUTRO_USUARIO)) {
 
             mNomeAmigo = getIntent().getStringExtra(Const.INTENT_NOME_OUTRO_USUARIO);
-
-        } else if (getIntent().hasExtra("from_userName")) {
-
-            mNomeAmigo = getIntent().getStringExtra("from_userName");
         }
 
         if (mIdAmigo == null) {
